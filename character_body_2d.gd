@@ -5,7 +5,7 @@ const JUMP_VEL       = -400.0
 const GRAVITY        = 800.0
 const JUMP_HOLD_GRAV = 400.0
 const DEPTH_SPEED    = 80.0
-const FLOOR_TOP      = 100.0    # highest point player can walk up to
+const FLOOR_TOP      = 300.0    # highest point player can walk up to
 const FLOOR_BOTTOM   = 400.0    # lowest point player can walk down to
 
 var is_landing       = false

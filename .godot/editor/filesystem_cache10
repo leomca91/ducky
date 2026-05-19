@@ -1,9 +1,9 @@
 ea4bc82a6ad023ab7ee23ee620429895
-::res://::1779150586
+::res://::1779150888
 character_body_2d.gd::GDScript/GDScript::8755045776164788102::1779063106::0::1::::<>CharacterBody2D<><>0<>0<><>::
-game.tscn::PackedScene::7929872977154477545::1779149991::0::1::::<><><>0<>0<><>::uid://dsae3ukl76xob::::res://player.tscn
+game.tscn::PackedScene::7929872977154477545::1779150735::0::1::::<><><>0<>0<><>::uid://dsae3ukl76xob::::res://player.tscn
 icon.svg::CompressedTexture2D/CompressedTexture2D::5854545073853563209::1778797358::1778797364::1::::<><><>0<>0<>ae519e50651adda49943d745d7a79e15<>res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex::
-player.tscn::PackedScene::8422955173223133969::1779150409::0::1::::<><><>0<>0<><>::uid://dw0albqe6x2dm::::res://character_body_2d.gd<>uid://dul0s1u5g7afj::::res://Sprites/Ducky Spritesheet V1/fall.png<>uid://bwdnmyfga6fyu::::res://Sprites/Ducky Spritesheet V1/idle.png<>uid://j5b2qbuh23vr::::res://Sprites/Ducky Spritesheet V1/walk.png<>uid://danw61gyabyoq::::res://Sprites/Ducky Spritesheet V1/jump.png<>uid://h85md17jih20::::res://Sprites/Ducky Spritesheet V1/right_hook.png<>uid://cg78but1oqjee::::res://Sprites/Ducky Spritesheet V1/u_smash.png<>uid://d4e7xq8bblvem::::res://Sprites/Ducky Spritesheet V1/right_left_combo.png<>uid://dfjfcvxv8gdt1::::res://Sprites/Ducky Spritesheet V1/land.png
+player.tscn::PackedScene::8422955173223133969::1779150816::0::1::::<><><>0<>0<><>::uid://dw0albqe6x2dm::::res://character_body_2d.gd<>uid://dul0s1u5g7afj::::res://Sprites/Ducky Spritesheet V1/fall.png<>uid://bwdnmyfga6fyu::::res://Sprites/Ducky Spritesheet V1/idle.png<>uid://j5b2qbuh23vr::::res://Sprites/Ducky Spritesheet V1/walk.png<>uid://danw61gyabyoq::::res://Sprites/Ducky Spritesheet V1/jump.png<>uid://h85md17jih20::::res://Sprites/Ducky Spritesheet V1/right_hook.png<>uid://cg78but1oqjee::::res://Sprites/Ducky Spritesheet V1/u_smash.png<>uid://d4e7xq8bblvem::::res://Sprites/Ducky Spritesheet V1/right_left_combo.png<>uid://dfjfcvxv8gdt1::::res://Sprites/Ducky Spritesheet V1/land.png
 ::res://Sprites/::1779150459
 Bread fail.png::CompressedTexture2D/CompressedTexture2D::8554165058725354312::1778797681::1779062538::1::::<><><>0<>0<>68459414028df09cca78bfe8fa6ac0a5<>res://.godot/imported/Bread fail.png-874a4c69772130de400b43168878eb15.ctex::
 ::res://Sprites/Ducky Spritesheet V1/::1779150461
