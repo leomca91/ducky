@@ -1,8 +1,9 @@
-[gd_scene load_steps=7 format=4 uid="uid://dk8j344o0qxs0"]
+[gd_scene load_steps=8 format=4 uid="uid://dk8j344o0qxs0"]
 
 [ext_resource type="PackedScene" uid="uid://dsae3ukl76xob" path="res://Scenes/player.tscn" id="1_ebmjs"]
 [ext_resource type="Texture2D" uid="uid://7cocck5dl76i" path="res://Sprites/Tilemaps/azul_tiles.png" id="1_wrm1d"]
 [ext_resource type="Texture2D" uid="uid://chbkth5cqm4fe" path="res://Sprites/Tilemaps/kitchen_v1.png" id="2_3dryh"]
+[ext_resource type="PackedScene" uid="uid://df0qbngwc7ym1" path="res://Scenes/Burgerenemie.tscn" id="4_3dryh"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wowpa"]
 texture = ExtResource("1_wrm1d")
@@ -938,9 +939,7 @@ tile_map_data = PackedByteArray("AAAOABIAAgAQAB0AAAAPABIAAgANAB0AAAAQABIAAgAOAB0
 tile_set = SubResource("TileSet_1l0tm")
 
 [node name="Player" parent="." instance=ExtResource("1_ebmjs")]
-position = Vector2(291, 343)
+position = Vector2(135, 331)
 
-[node name="Camera" type="Camera2D" parent="."]
-position = Vector2(287, 324)
-scale = Vector2(-37174.7, -2348.55)
-zoom = Vector2(3, 3)
+[node name="Burgerenemie" parent="." instance=ExtResource("4_3dryh")]
+position = Vector2(467, 353)

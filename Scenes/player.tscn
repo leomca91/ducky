@@ -1,6 +1,6 @@
 [gd_scene load_steps=87 format=3 uid="uid://dsae3ukl76xob"]
 
-[ext_resource type="Script" uid="uid://dw0albqe6x2dm" path="res://character_body_2d.gd" id="1_onrkg"]
+[ext_resource type="Script" uid="uid://dw0albqe6x2dm" path="res://GD's/character_body_2d.gd" id="1_onrkg"]
 [ext_resource type="Texture2D" uid="uid://dul0s1u5g7afj" path="res://Sprites/Ducky Spritesheet V1/fall.png" id="2_b26j0"]
 [ext_resource type="Texture2D" uid="uid://4w6faoku7u2l" path="res://Sprites/Ducky Spritesheet V1/crouch.png" id="2_h4iuc"]
 [ext_resource type="Texture2D" uid="uid://bwdnmyfga6fyu" path="res://Sprites/Ducky Spritesheet V1/idle.png" id="2_hqtel"]
@@ -574,7 +574,7 @@ animations = [{
 "speed": 10.0
 }]
 
-[node name="Player" type="CharacterBody2D"]
+[node name="Player" type="CharacterBody2D" groups=["player"]]
 script = ExtResource("1_onrkg")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
@@ -585,3 +585,6 @@ shape = SubResource("CircleShape2D_5tmop")
 position = Vector2(0, -16)
 sprite_frames = SubResource("SpriteFrames_pbfsw")
 animation = &"Parry"
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(3, 3)

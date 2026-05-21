@@ -13,10 +13,18 @@ const FLOOR_TOP          = 300.0
 const FLOOR_BOTTOM       = 415.0
 const SPAM_HOLD_TIME     = 0.4
 const CROUCH_SPEED_MULT  = 0.3
-const ROLL_SPEED         = 200.0
-const ROLL_DEPTH_SPEED   = 100.0     # up/down roll speed
+const ROLL_SPEED         = 350.0
+const ROLL_DEPTH_SPEED   = 200.0
 const ROLL_DURATION      = 0.35
-const SPECIAL_COOLDOWN   = 2.0
+const SPECIAL_COOLDOWN   = 3.0
+const LEFT_BOUNDARY      = 0.0      # player cannot go left of this
+
+# attack damage values
+const DMG_RIGHT_HOOK     = 5
+const DMG_SPAM_ATTACK    = 2        # lower per hit since it hits many times
+const DMG_FSMASH         = 12
+const DMG_FTILT          = 10
+const DMG_USMASH         = 18
 
 var is_jumping           = false
 var jump_y               = 0.0
@@ -31,8 +39,8 @@ var is_holding_jump      = false
 var is_crouching         = false
 var is_rolling           = false
 var roll_timer           = 0.0
-var roll_dir_x           = 0.0      # horizontal roll direction
-var roll_dir_y           = 0.0      # vertical roll direction
+var roll_dir_x           = 0.0
+var roll_dir_y           = 0.0
 
 var special_cooldown     = 0.0
 
@@ -41,10 +49,18 @@ var is_hurt              = false
 var is_parrying          = false
 
 @onready var sprite      = $AnimatedSprite2D
+@onready var camera      = $Camera2D
 
 func _ready():
 	sprite.animation_finished.connect(_on_animation_finished)
 	position.y = FLOOR_BOTTOM
+
+	# camera only scrolls right — locks left edge
+	camera.limit_left    = int(LEFT_BOUNDARY)
+	camera.limit_bottom  = 600
+	camera.limit_top     = -200
+	# right limit very large so it scrolls right freely
+	camera.limit_right   = 100000
 
 func _on_animation_finished():
 	match sprite.animation:
@@ -104,19 +120,12 @@ func _do_roll():
 	is_rolling     = true
 	roll_timer     = ROLL_DURATION
 	current_attack = "Roll1"
-
-	# capture direction at moment of roll press — includes up/down
-	var dir_x  = Input.get_axis("move_left", "move_right")
-	var dir_y  = Input.get_axis("move_up", "move_down")
-
-	# default to facing direction if no horizontal input
-	roll_dir_x = dir_x if dir_x != 0 else (1.0 if not sprite.flip_h else -1.0)
-	roll_dir_y = dir_y    # can be -1, 0 or 1
-
-	# flip sprite to roll direction
+	var dir_x      = Input.get_axis("move_left", "move_right")
+	var dir_y      = Input.get_axis("move_up", "move_down")
+	roll_dir_x     = dir_x if dir_x != 0 else (1.0 if not sprite.flip_h else -1.0)
+	roll_dir_y     = dir_y
 	if roll_dir_x != 0:
 		sprite.flip_h = roll_dir_x < 0
-
 	sprite.play("Roll1")
 
 func _start_attack(attack_name: String):
@@ -124,6 +133,26 @@ func _start_attack(attack_name: String):
 		return
 	current_attack = attack_name
 	sprite.play(attack_name)
+
+	# deal damage to any nearby enemies
+	var damage = 0
+	match attack_name:
+		"RightHook":  damage = DMG_RIGHT_HOOK
+		"SpamAttack": damage = DMG_SPAM_ATTACK
+		"Fsmash":     damage = DMG_FSMASH
+		"Ftilt":      damage = DMG_FTILT
+		"Usmash":     damage = DMG_USMASH
+
+	if damage > 0:
+		_hit_nearby_enemies(damage)
+
+func _hit_nearby_enemies(damage: int):
+	# find all enemies in the scene and check distance
+	var enemies = get_tree().get_nodes_in_group("enemies")
+	for enemy in enemies:
+		var dist = global_position.distance_to(enemy.global_position)
+		if dist < 60.0:    # attack reach in pixels
+			enemy.take_damage(damage, global_position)
 
 func _physics_process(delta):
 	if is_dead:
@@ -143,15 +172,11 @@ func _physics_process(delta):
 
 	if is_rolling:
 		roll_timer -= delta
-
-		# roll moves in captured direction
 		position.x += roll_dir_x * ROLL_SPEED * delta
-
 		if is_jumping:
-			# in air — roll goes up or down based on roll_dir_y, falls faster
 			if roll_dir_y != 0:
 				visual_offset += roll_dir_y * ROLL_DEPTH_SPEED * delta
-			jump_y += FALL_GRAVITY * delta * 0.8
+			jump_y        += FALL_GRAVITY * delta * 0.8
 			visual_offset += jump_y * delta
 			if visual_offset >= 0.0:
 				visual_offset  = 0.0
@@ -161,31 +186,28 @@ func _physics_process(delta):
 				has_inhaled    = false
 				sprite.play("Land")
 		else:
-			# on ground — roll goes up or down on depth plane
 			if roll_dir_y != 0:
 				position.y += roll_dir_y * ROLL_DEPTH_SPEED * delta
 				position.y  = clamp(position.y, FLOOR_TOP, FLOOR_BOTTOM)
-
 		if roll_timer <= 0.0:
 			is_rolling     = false
 			current_attack = ""
 	else:
-		# normal horizontal movement
 		var dir_x   = Input.get_axis("move_left", "move_right")
 		var spd     = SPEED * CROUCH_SPEED_MULT if is_crouching else SPEED
 		position.x += dir_x * spd * delta
 
-		# flip sprite based on movement direction in air AND on ground
 		if dir_x != 0:
 			sprite.flip_h = dir_x < 0
 
-		# depth movement
 		if not is_jumping and not is_crouching:
 			var dir_y   = Input.get_axis("move_up", "move_down")
 			position.y += dir_y * DEPTH_SPEED * delta
 			position.y  = clamp(position.y, FLOOR_TOP, FLOOR_BOTTOM)
 
-	# jump
+	# clamp left boundary
+	position.x = max(position.x, LEFT_BOUNDARY)
+
 	if Input.is_action_just_pressed("jump") and not is_dead:
 		if not is_jumping:
 			is_jumping      = true
@@ -207,7 +229,6 @@ func _physics_process(delta):
 			else:
 				sprite.play("Flapping")
 
-	# hold space boost
 	if is_holding_jump and Input.is_action_pressed("jump"):
 		jump_hold_timer += delta
 		if jump_hold_timer < JUMP_HOLD_TIME:
@@ -217,7 +238,6 @@ func _physics_process(delta):
 	else:
 		is_holding_jump = false
 
-	# apply jump physics
 	if is_jumping and not is_rolling:
 		var grav       = GRAVITY if jump_y < 0 else FALL_GRAVITY
 		jump_y        += grav * delta
@@ -242,7 +262,6 @@ func _physics_process(delta):
 func _update_animation():
 	if is_dead:
 		return
-
 	if sprite.animation == "Land" and sprite.is_playing():
 		return
 	if sprite.animation == "Inhale" and sprite.is_playing():
@@ -251,7 +270,6 @@ func _update_animation():
 		return
 	if sprite.animation == "Parry" and sprite.is_playing():
 		return
-
 	if current_attack != "" and sprite.is_playing():
 		return
 
