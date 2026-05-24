@@ -16,15 +16,21 @@ const CROUCH_SPEED_MULT  = 0.3
 const ROLL_SPEED         = 350.0
 const ROLL_DEPTH_SPEED   = 200.0
 const ROLL_DURATION      = 0.35
-const SPECIAL_COOLDOWN   = 0.5
-const LEFT_BOUNDARY      = 0.0      # player cannot go left of this
+const SPECIAL_COOLDOWN   = 3.0
+const LEFT_BOUNDARY      = 0.0
+const ATTACK_SLOW        = 0.3
 
-# attack damage values
 const DMG_RIGHT_HOOK     = 5
-const DMG_SPAM_ATTACK    = 2        # lower per hit since it hits many times
+const DMG_SPAM_ATTACK    = 2
 const DMG_FSMASH         = 12
 const DMG_FTILT          = 10
 const DMG_USMASH         = 18
+
+const REACH_RIGHT_HOOK   = 40.0
+const REACH_SPAM         = 35.0
+const REACH_FSMASH       = 50.0
+const REACH_FTILT        = 45.0
+const REACH_USMASH       = 40.0
 
 var is_jumping           = false
 var jump_y               = 0.0
@@ -35,32 +41,24 @@ var flap_count           = 0
 var has_inhaled          = false
 var jump_hold_timer      = 0.0
 var is_holding_jump      = false
-
 var is_crouching         = false
 var is_rolling           = false
 var roll_timer           = 0.0
 var roll_dir_x           = 0.0
 var roll_dir_y           = 0.0
-
 var special_cooldown     = 0.0
-
+var spam_hit_timer       = 0.0
+const SPAM_HIT_RATE      = 0.15
 var is_dead              = false
 var is_hurt              = false
 var is_parrying          = false
 
 @onready var sprite      = $AnimatedSprite2D
-@onready var camera      = $Camera2D
 
 func _ready():
 	sprite.animation_finished.connect(_on_animation_finished)
 	position.y = FLOOR_BOTTOM
-
-	# camera only scrolls right — locks left edge
-	camera.limit_left    = int(LEFT_BOUNDARY)
-	camera.limit_bottom  = 600
-	camera.limit_top     = -200
-	# right limit very large so it scrolls right freely
-	camera.limit_right   = 100000
+	add_to_group("player")
 
 func _on_animation_finished():
 	match sprite.animation:
@@ -86,7 +84,8 @@ func _input(event):
 
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
-			hold_timer = 0.0
+			hold_timer     = 0.0
+			spam_hit_timer = 0.0
 			_start_attack("RightHook")
 		else:
 			hold_timer = 0.0
@@ -134,24 +133,30 @@ func _start_attack(attack_name: String):
 	current_attack = attack_name
 	sprite.play(attack_name)
 
-	# deal damage to any nearby enemies
 	var damage = 0
+	var reach  = 0.0
 	match attack_name:
-		"RightHook":  damage = DMG_RIGHT_HOOK
-		"SpamAttack": damage = DMG_SPAM_ATTACK
-		"Fsmash":     damage = DMG_FSMASH
-		"Ftilt":      damage = DMG_FTILT
-		"Usmash":     damage = DMG_USMASH
+		"RightHook":
+			damage = DMG_RIGHT_HOOK
+			reach  = REACH_RIGHT_HOOK
+		"Fsmash":
+			damage = DMG_FSMASH
+			reach  = REACH_FSMASH
+		"Ftilt":
+			damage = DMG_FTILT
+			reach  = REACH_FTILT
+		"Usmash":
+			damage = DMG_USMASH
+			reach  = REACH_USMASH
 
 	if damage > 0:
-		_hit_nearby_enemies(damage)
+		_hit_nearby_enemies(damage, reach)
 
-func _hit_nearby_enemies(damage: int):
-	# find all enemies in the scene and check distance
+func _hit_nearby_enemies(damage: int, reach: float):
 	var enemies = get_tree().get_nodes_in_group("enemies")
 	for enemy in enemies:
 		var dist = global_position.distance_to(enemy.global_position)
-		if dist < 60.0:    # attack reach in pixels
+		if dist < reach:
 			enemy.take_damage(damage, global_position)
 
 func _physics_process(delta):
@@ -161,14 +166,24 @@ func _physics_process(delta):
 	if special_cooldown > 0.0:
 		special_cooldown -= delta
 
+	if current_attack == "SpamAttack":
+		spam_hit_timer -= delta
+		if spam_hit_timer <= 0.0:
+			spam_hit_timer = SPAM_HIT_RATE
+			_hit_nearby_enemies(DMG_SPAM_ATTACK, REACH_SPAM)
+
 	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 		hold_timer += delta
 		if hold_timer >= SPAM_HOLD_TIME and current_attack != "SpamAttack":
-			_start_attack("SpamAttack")
+			current_attack = "SpamAttack"
+			spam_hit_timer = 0.0
+			sprite.play("SpamAttack")
 	else:
 		hold_timer = 0.0
 
 	is_crouching = Input.is_action_pressed("crouch") and not is_jumping and not is_rolling
+
+	var attack_mult = ATTACK_SLOW if current_attack != "" else 1.0
 
 	if is_rolling:
 		roll_timer -= delta
@@ -194,7 +209,7 @@ func _physics_process(delta):
 			current_attack = ""
 	else:
 		var dir_x   = Input.get_axis("move_left", "move_right")
-		var spd     = SPEED * CROUCH_SPEED_MULT if is_crouching else SPEED
+		var spd     = SPEED * CROUCH_SPEED_MULT if is_crouching else SPEED * attack_mult
 		position.x += dir_x * spd * delta
 
 		if dir_x != 0:
@@ -205,7 +220,6 @@ func _physics_process(delta):
 			position.y += dir_y * DEPTH_SPEED * delta
 			position.y  = clamp(position.y, FLOOR_TOP, FLOOR_BOTTOM)
 
-	# clamp left boundary
 	position.x = max(position.x, LEFT_BOUNDARY)
 
 	if Input.is_action_just_pressed("jump") and not is_dead:
