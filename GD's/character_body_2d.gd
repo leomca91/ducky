@@ -16,7 +16,7 @@ const CROUCH_SPEED_MULT  = 0.3
 const ROLL_SPEED         = 350.0
 const ROLL_DEPTH_SPEED   = 200.0
 const ROLL_DURATION      = 0.35
-const SPECIAL_COOLDOWN   = 3.0
+const SPECIAL_COOLDOWN   = 0.5
 const LEFT_BOUNDARY      = 0.0      # player cannot go left of this
 
 # attack damage values

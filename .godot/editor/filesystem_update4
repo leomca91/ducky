@@ -1,6 +1,4 @@
 res://Scenes/player.tscn
 res://Scenes/game.tscn
-res://GD's/character_body_2d.gd
-res://Burgerenemie.tscn
-res://burgerenemie.gd
 res://Scenes/Burgerenemie.tscn
+res://GD's/character_body_2d.gd
