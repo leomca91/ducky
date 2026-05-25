@@ -19,6 +19,9 @@ const ROLL_DURATION      = 0.35
 const SPECIAL_COOLDOWN   = 3.0
 const LEFT_BOUNDARY      = 0.0
 const ATTACK_SLOW        = 0.3
+const MAX_HEALTH         = 100
+const PARRY_HEAL         = 15
+const PARRY_WINDOW       = 0.3
 
 const DMG_RIGHT_HOOK     = 5
 const DMG_SPAM_ATTACK    = 2
@@ -52,6 +55,10 @@ const SPAM_HIT_RATE      = 0.15
 var is_dead              = false
 var is_hurt              = false
 var is_parrying          = false
+var parry_timer          = 0.0
+var parry_used           = false
+var health               = MAX_HEALTH
+var hud                  = null
 
 @onready var sprite      = $AnimatedSprite2D
 
@@ -59,6 +66,10 @@ func _ready():
 	sprite.animation_finished.connect(_on_animation_finished)
 	position.y = FLOOR_BOTTOM
 	add_to_group("player")
+	await get_tree().process_frame
+	hud = get_tree().get_first_node_in_group("hud")
+	if hud:
+		hud.set_max_health(MAX_HEALTH)
 
 func _on_animation_finished():
 	match sprite.animation:
@@ -75,6 +86,7 @@ func _on_animation_finished():
 			is_hurt        = false
 		"Parry":
 			is_parrying    = false
+			parry_timer    = 0.0
 		"Death":
 			pass
 
@@ -107,11 +119,19 @@ func _input(event):
 					_start_attack("Usmash")
 					special_cooldown = SPECIAL_COOLDOWN
 			KEY_F:
-				if not is_parrying and not is_jumping:
+				if not parry_used and not is_parrying and not is_jumping:
 					is_parrying = true
+					parry_timer = PARRY_WINDOW
+					parry_used  = true
 					sprite.play("Parry")
 			KEY_SHIFT:
 				_do_roll()
+
+	# release F to reset parry — must re-press to parry again
+	if event is InputEventKey and not event.pressed:
+		if event.keycode == KEY_F:
+			parry_used  = false
+			is_parrying = false
 
 func _do_roll():
 	if is_rolling:
@@ -162,6 +182,9 @@ func _hit_nearby_enemies(damage: int, reach: float):
 func _physics_process(delta):
 	if is_dead:
 		return
+
+	if is_parrying and parry_timer > 0.0:
+		parry_timer -= delta
 
 	if special_cooldown > 0.0:
 		special_cooldown -= delta
@@ -273,6 +296,40 @@ func _physics_process(delta):
 
 	_update_animation()
 
+func take_damage():
+	if is_dead or is_hurt:
+		return
+
+	if is_parrying and parry_timer > 0.0:
+		_successful_parry()
+		return
+
+	is_hurt  = true
+	health  -= 10
+	sprite.play("Hurt")
+
+	if hud:
+		hud.take_damage(10)
+
+	if health <= 0:
+		die()
+
+func _successful_parry():
+	health = min(MAX_HEALTH, health + PARRY_HEAL)
+	if hud:
+		hud.heal(PARRY_HEAL)
+	sprite.modulate = Color(0.2, 1.0, 0.2, 1.0)
+	await get_tree().create_timer(0.15).timeout
+	sprite.modulate = Color(1, 1, 1, 1)
+
+func die():
+	if is_dead:
+		return
+	is_dead = true
+	sprite.play("Death")
+	set_physics_process(false)
+	set_process_input(false)
+
 func _update_animation():
 	if is_dead:
 		return
@@ -310,13 +367,3 @@ func _update_animation():
 			sprite.flip_h = dir_x < 0
 	else:
 		sprite.play("Idle")
-
-func take_damage():
-	if is_dead:
-		return
-	is_hurt = true
-	sprite.play("Hurt")
-
-func die():
-	is_dead = true
-	sprite.play("Death")
