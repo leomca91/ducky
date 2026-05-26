@@ -8,21 +8,23 @@ const ATTACK_RANGE    = 5.0
 const ATTACK_DAMAGE   = 8
 const ATTACK_RATE     = 1.5
 const MAX_HEALTH      = 60
-const ATTACK_WARN     = 0.4    # seconds of blue flash before attack lands
+const ATTACK_WARN     = 0.4
 
 var health            = MAX_HEALTH
 var player            = null
 var attack_timer      = 0.0
 var is_dead           = false
 var is_attacking      = false
-var is_warning        = false    # true during blue flash warning
+var is_warning        = false
 var warn_timer        = 0.0
 var attack_anim_timer = 0.0
 var flash_timer       = 0.0
 var flash_color       = Color(1, 1, 1, 1)
 var is_flashing       = false
+var is_active         = false    # only true once enemy enters camera view
 
 @onready var sprite   = $AnimatedSprite2D
+@onready var notifier = $VisibleOnScreenNotifier2D
 
 const FLASH_SHADER = """
 shader_type canvas_item;
@@ -42,12 +44,20 @@ func _ready():
 	player = get_tree().get_first_node_in_group("player")
 	position.y = FLOOR_BOTTOM
 	sprite.animation_finished.connect(_on_animation_finished)
+	sprite.play("idle")
+
+	# connect visibility signal
+	notifier.screen_entered.connect(_on_screen_entered)
 
 	var shader      = Shader.new()
 	shader.code     = FLASH_SHADER
 	var mat         = ShaderMaterial.new()
 	mat.shader      = shader
 	sprite.material = mat
+
+func _on_screen_entered():
+	# once enemy enters screen it activates permanently
+	is_active = true
 
 func _on_animation_finished():
 	if sprite.animation == "attack":
@@ -59,27 +69,11 @@ func _physics_process(delta):
 	if is_dead or player == null:
 		return
 
-	# blue warning flash pulse
-	if is_warning:
-		warn_timer -= delta
-		# pulse blue in and out so it looks like a warning
-		var pulse = abs(sin(warn_timer * 20.0))
-		(sprite.material as ShaderMaterial).set_shader_parameter(
-			"flash_color", Color(0.2, 0.4, 1.0, pulse * 0.8)
-		)
-		if warn_timer <= 0.0:
-			is_warning = false
-			_clear_flash()
-			_execute_attack()
+	# sit idle until camera reaches this enemy
+	if not is_active:
+		sprite.play("idle")
+		return
 
-	# fallback stuck reset
-	if is_attacking:
-		attack_anim_timer += delta
-		if attack_anim_timer > 2.0:
-			is_attacking      = false
-			attack_anim_timer = 0.0
-
-	# normal hurt flash
 	if is_flashing:
 		flash_timer -= delta
 		var alpha = clamp(flash_timer / 0.15, 0.0, 1.0)
@@ -90,17 +84,38 @@ func _physics_process(delta):
 			is_flashing = false
 			_clear_flash()
 
+	if is_warning:
+		warn_timer -= delta
+		var pulse = abs(sin(warn_timer * 20.0))
+		(sprite.material as ShaderMaterial).set_shader_parameter(
+			"flash_color", Color(0.2, 0.4, 1.0, pulse * 0.8)
+		)
+		if warn_timer <= 0.0:
+			is_warning = false
+			_clear_flash()
+			_execute_attack()
+
+	if is_attacking:
+		attack_anim_timer += delta
+		if attack_anim_timer > 2.0:
+			is_attacking      = false
+			attack_anim_timer = 0.0
+
 	attack_timer -= delta
 
-	var dist = global_position.distance_to(player.global_position)
+	var hdist                = abs(global_position.x - player.global_position.x)
+	var depth_dist           = abs(position.y - player.position.y)
+	var player_visual_offset = player.visual_offset
+	var on_same_plane        = depth_dist < 30.0 and player_visual_offset > -20.0
 
-	if dist <= ATTACK_RANGE:
+	if hdist <= ATTACK_RANGE and on_same_plane:
 		if attack_timer <= 0.0 and not is_attacking and not is_warning:
 			_start_warning()
 		else:
-			sprite.play("idle")
+			if not is_attacking and not is_warning:
+				sprite.play("idle")
 	else:
-		if is_attacking and dist > ATTACK_RANGE + 5.0:
+		if is_attacking and hdist > ATTACK_RANGE + 5.0:
 			is_attacking      = false
 			attack_anim_timer = 0.0
 		if not is_warning:
@@ -113,15 +128,17 @@ func _physics_process(delta):
 func _start_warning():
 	is_warning = true
 	warn_timer = ATTACK_WARN
-	# stop moving while warning
 	sprite.play("idle")
 
 func _execute_attack():
-	attack_timer      = ATTACK_RATE
-	is_attacking      = true
-	attack_anim_timer = 0.0
+	var depth_dist           = abs(position.y - player.position.y)
+	var player_visual_offset = player.visual_offset
+	var on_same_plane        = depth_dist < 30.0 and player_visual_offset > -20.0
+	attack_timer             = ATTACK_RATE
+	is_attacking             = true
+	attack_anim_timer        = 0.0
 	sprite.play("attack")
-	if player and player.has_method("take_damage"):
+	if player and player.has_method("take_damage") and on_same_plane:
 		player.take_damage()
 
 func _move_toward_player(delta):
@@ -150,12 +167,14 @@ func take_damage(amount: int, from_pos: Vector2):
 	health -= amount
 	_flash(Color(1, 1, 1))
 
+	# activate if hit before entering screen
+	is_active = true
+
 	var knockback_strength = 8.0 if amount <= 2 else 30.0
 	var dir_x              = sign(global_position.x - from_pos.x)
 	position.x            += dir_x * knockback_strength
 	position.y             = clamp(position.y, FLOOR_TOP, FLOOR_BOTTOM)
 
-	# hitting enemy during warning cancels the attack
 	if is_warning:
 		is_warning = false
 		warn_timer = 0.0

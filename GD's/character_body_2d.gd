@@ -16,12 +16,12 @@ const CROUCH_SPEED_MULT  = 0.3
 const ROLL_SPEED         = 350.0
 const ROLL_DEPTH_SPEED   = 200.0
 const ROLL_DURATION      = 0.35
-const SPECIAL_COOLDOWN   = 3.0
 const LEFT_BOUNDARY      = 0.0
 const ATTACK_SLOW        = 0.3
 const MAX_HEALTH         = 100
 const PARRY_HEAL         = 15
 const PARRY_WINDOW       = 0.3
+const INVINCIBLE_TIME    = 0.5
 
 const DMG_RIGHT_HOOK     = 5
 const DMG_SPAM_ATTACK    = 2
@@ -49,16 +49,21 @@ var is_rolling           = false
 var roll_timer           = 0.0
 var roll_dir_x           = 0.0
 var roll_dir_y           = 0.0
-var special_cooldown     = 0.0
-var spam_hit_timer       = 0.0
-const SPAM_HIT_RATE      = 0.15
 var is_dead              = false
 var is_hurt              = false
+var invincible_timer     = 0.0
 var is_parrying          = false
 var parry_timer          = 0.0
 var parry_used           = false
 var health               = MAX_HEALTH
 var hud                  = null
+var spam_hit_timer       = 0.0
+const SPAM_HIT_RATE      = 0.15
+
+# per key used flags — must release key to attack again
+var q_used               = false
+var e_used               = false
+var r_used               = false
 
 @onready var sprite      = $AnimatedSprite2D
 
@@ -107,17 +112,17 @@ func _input(event):
 	if event is InputEventKey and event.pressed:
 		match event.keycode:
 			KEY_Q:
-				if special_cooldown <= 0.0:
+				if not q_used:
+					q_used = true
 					_start_attack("Fsmash")
-					special_cooldown = SPECIAL_COOLDOWN
 			KEY_E:
-				if special_cooldown <= 0.0:
+				if not e_used:
+					e_used = true
 					_start_attack("Ftilt")
-					special_cooldown = SPECIAL_COOLDOWN
 			KEY_R:
-				if special_cooldown <= 0.0:
+				if not r_used:
+					r_used = true
 					_start_attack("Usmash")
-					special_cooldown = SPECIAL_COOLDOWN
 			KEY_F:
 				if not parry_used and not is_parrying and not is_jumping:
 					is_parrying = true
@@ -127,11 +132,18 @@ func _input(event):
 			KEY_SHIFT:
 				_do_roll()
 
-	# release F to reset parry — must re-press to parry again
+	# release keys to reset flags
 	if event is InputEventKey and not event.pressed:
-		if event.keycode == KEY_F:
-			parry_used  = false
-			is_parrying = false
+		match event.keycode:
+			KEY_Q:
+				q_used     = false
+			KEY_E:
+				e_used     = false
+			KEY_R:
+				r_used     = false
+			KEY_F:
+				parry_used  = false
+				is_parrying = false
 
 func _do_roll():
 	if is_rolling:
@@ -183,11 +195,14 @@ func _physics_process(delta):
 	if is_dead:
 		return
 
+	if invincible_timer > 0.0:
+		invincible_timer -= delta
+		sprite.modulate.a = 0.5 if fmod(invincible_timer, 0.1) > 0.05 else 1.0
+	else:
+		sprite.modulate.a = 1.0
+
 	if is_parrying and parry_timer > 0.0:
 		parry_timer -= delta
-
-	if special_cooldown > 0.0:
-		special_cooldown -= delta
 
 	if current_attack == "SpamAttack":
 		spam_hit_timer -= delta
@@ -297,15 +312,17 @@ func _physics_process(delta):
 	_update_animation()
 
 func take_damage():
-	if is_dead or is_hurt:
+	if is_dead:
 		return
-
+	if invincible_timer > 0.0:
+		return
 	if is_parrying and parry_timer > 0.0:
 		_successful_parry()
 		return
 
-	is_hurt  = true
-	health  -= 10
+	is_hurt          = true
+	invincible_timer = INVINCIBLE_TIME
+	health          -= 10
 	sprite.play("Hurt")
 
 	if hud:

@@ -1,7 +1,7 @@
-res://Scenes/game.tscn
-res://GD's/character_body_2d.gd
-res://GD's/health_bar.gd
-res://GD's/hud.gd
-res://HUD.tscn
 res://Scenes/player.tscn
+res://Scenes/game.tscn
 res://Scenes/Burgerenemie.tscn
+res://HUD.tscn
+res://GD's/character_body_2d.gd
+res://GD's/burgerenemie.gd
+res://Scenes/HUD.tscn

@@ -1,10 +1,11 @@
+VisibleOnScreenNotifier2D
+Node
 ColorRect
 TextureRect
 Control
 CanvasLayer
 Camera2D
 AnimatedSprite2D
-Node
 TileMapLayer
 CollisionShape2D
 CharacterBody2D
