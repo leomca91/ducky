@@ -1,12 +1,12 @@
-[gd_scene load_steps=3 format=3 uid="uid://bow8e7eib3mjx"]
+[gd_scene format=3 uid="uid://bow8e7eib3mjx"]
 
 [ext_resource type="Script" uid="uid://b50nat8v1njvu" path="res://GD's/hud.gd" id="1_efote"]
 [ext_resource type="Script" uid="uid://bu4edjtocg45p" path="res://GD's/health_bar.gd" id="2_vow1y"]
 
-[node name="HUD" type="CanvasLayer"]
+[node name="HUD" type="CanvasLayer" unique_id=316698461]
 script = ExtResource("1_efote")
 
-[node name="HealthBar" type="Control" parent="."]
+[node name="HealthBar" type="Control" parent="." unique_id=1891346141]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
