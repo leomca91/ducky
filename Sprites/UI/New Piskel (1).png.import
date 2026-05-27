@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://brsboqc4ow42a"
-path="res://.godot/imported/climb_back.png-83352c9d6d5192c8023637ba1cd4c723.ctex"
+uid="uid://dhbttgd1mthmn"
+path="res://.godot/imported/New Piskel (1).png-3dc1b895587d61973f662d20938d9ac4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Sprites/Ducky Spritesheet V1/climb_back.png"
-dest_files=["res://.godot/imported/climb_back.png-83352c9d6d5192c8023637ba1cd4c723.ctex"]
+source_file="res://Sprites/UI/New Piskel (1).png"
+dest_files=["res://.godot/imported/New Piskel (1).png-3dc1b895587d61973f662d20938d9ac4.ctex"]
 
 [params]
 

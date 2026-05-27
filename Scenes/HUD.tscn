@@ -1,14 +1,56 @@
-[gd_scene format=3 uid="uid://bow8e7eib3mjx"]
+[gd_scene load_steps=9 format=3 uid="uid://bow8e7eib3mjx"]
 
 [ext_resource type="Script" uid="uid://b50nat8v1njvu" path="res://GD's/hud.gd" id="1_efote"]
-[ext_resource type="Script" uid="uid://bu4edjtocg45p" path="res://GD's/health_bar.gd" id="2_vow1y"]
+[ext_resource type="Texture2D" uid="uid://dhbttgd1mthmn" path="res://Sprites/UI/New Piskel (1).png" id="2_jo1ms"]
 
-[node name="HUD" type="CanvasLayer" unique_id=316698461]
+[sub_resource type="AtlasTexture" id="AtlasTexture_psnte"]
+atlas = ExtResource("2_jo1ms")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s3jbq"]
+atlas = ExtResource("2_jo1ms")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c3eba"]
+atlas = ExtResource("2_jo1ms")
+region = Rect2(0, 32, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g8s2e"]
+atlas = ExtResource("2_jo1ms")
+region = Rect2(32, 32, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_t385i"]
+atlas = ExtResource("2_jo1ms")
+region = Rect2(0, 64, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_nfm57"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_psnte")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s3jbq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c3eba")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g8s2e")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_t385i")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 1.0
+}]
+
+[node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_efote")
 
-[node name="HealthBar" type="Control" parent="." unique_id=1891346141]
-layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-script = ExtResource("2_vow1y")
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+position = Vector2(32, 30)
+scale = Vector2(2, 2)
+sprite_frames = SubResource("SpriteFrames_nfm57")
+animation = &"idle"
