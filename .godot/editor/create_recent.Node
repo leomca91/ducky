@@ -1,4 +1,7 @@
+CollisionShape2D
 AnimatedSprite2D
+Area2D
+Node2D
 VisibleOnScreenNotifier2D
 Node
 ColorRect
@@ -7,5 +10,4 @@ Control
 CanvasLayer
 Camera2D
 TileMapLayer
-CollisionShape2D
 CharacterBody2D

@@ -1,0 +1,93 @@
+[gd_scene load_steps=14 format=3 uid="uid://cepgwov22ush3"]
+
+[ext_resource type="Script" uid="uid://dufqs8eaaayne" path="res://Scenes/crab_enemy.gd" id="1_3asvk"]
+[ext_resource type="Texture2D" uid="uid://cl8scf7rb12bu" path="res://Sprites/Crab/attack/crab_attack.png" id="1_4oagd"]
+[ext_resource type="Texture2D" uid="uid://bww3x7t1evrvp" path="res://Sprites/Crab/idle/crab_idle.png" id="2_3asvk"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hucot"]
+atlas = ExtResource("1_4oagd")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8e33j"]
+atlas = ExtResource("1_4oagd")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7y88q"]
+atlas = ExtResource("1_4oagd")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4rr2i"]
+atlas = ExtResource("1_4oagd")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6owdx"]
+atlas = ExtResource("1_4oagd")
+region = Rect2(128, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j4sem"]
+atlas = ExtResource("2_3asvk")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vyqpc"]
+atlas = ExtResource("2_3asvk")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_eppms"]
+atlas = ExtResource("2_3asvk")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8sgxf"]
+atlas = ExtResource("2_3asvk")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_43px4"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hucot")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8e33j")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7y88q")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4rr2i")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6owdx")
+}],
+"loop": false,
+"name": &"Attack",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j4sem")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vyqpc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_eppms")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8sgxf")
+}],
+"loop": true,
+"name": &"Idle",
+"speed": 10.0
+}]
+
+[node name="CrabEnemy" type="Node2D"]
+script = ExtResource("1_3asvk")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_43px4")
+animation = &"Idle"
+frame_progress = 0.262542
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
+
+[node name="ProjectileSpawner" type="Node2D" parent="."]

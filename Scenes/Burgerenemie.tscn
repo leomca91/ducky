@@ -1,7 +1,7 @@
 [gd_scene load_steps=20 format=3 uid="uid://df0qbngwc7ym1"]
 
 [ext_resource type="Script" uid="uid://83u8cydryiqx" path="res://GD's/burgerenemie.gd" id="1_4f4ok"]
-[ext_resource type="Texture2D" uid="uid://bxo4u0eh6vjxu" path="res://Sprites/burger_spritesheet.png" id="1_bow4m"]
+[ext_resource type="Texture2D" uid="uid://bxo4u0eh6vjxu" path="res://Sprites/Effects/burger_spritesheet.png" id="1_bow4m"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_6bd67"]
 atlas = ExtResource("1_bow4m")

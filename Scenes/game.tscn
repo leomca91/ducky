@@ -1,11 +1,12 @@
-[gd_scene load_steps=10 format=4 uid="uid://dk8j344o0qxs0"]
+[gd_scene load_steps=11 format=4 uid="uid://dk8j344o0qxs0"]
 
 [ext_resource type="PackedScene" uid="uid://dsae3ukl76xob" path="res://Scenes/player.tscn" id="1_ebmjs"]
 [ext_resource type="Texture2D" uid="uid://7cocck5dl76i" path="res://Sprites/Tilemaps/azul_tiles.png" id="1_wrm1d"]
 [ext_resource type="Texture2D" uid="uid://chbkth5cqm4fe" path="res://Sprites/Tilemaps/kitchen_v1.png" id="2_3dryh"]
 [ext_resource type="PackedScene" uid="uid://df0qbngwc7ym1" path="res://Scenes/Burgerenemie.tscn" id="4_3dryh"]
-[ext_resource type="Script" uid="uid://kwjdgftnjodd" path="res://Scenes/camera_2d.gd" id="5_wowpa"]
+[ext_resource type="Script" uid="uid://kwjdgftnjodd" path="res://GD's/camera_2d.gd" id="5_wowpa"]
 [ext_resource type="PackedScene" uid="uid://bow8e7eib3mjx" path="res://Scenes/HUD.tscn" id="6_i6g32"]
+[ext_resource type="PackedScene" uid="uid://cepgwov22ush3" path="res://Scenes/CrabEnemy.tscn" id="7_1l0tm"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wowpa"]
 texture = ExtResource("1_wrm1d")
@@ -958,3 +959,6 @@ position = Vector2(596, 313)
 script = ExtResource("5_wowpa")
 
 [node name="HUD" parent="." instance=ExtResource("6_i6g32")]
+
+[node name="CrabEnemy" parent="." instance=ExtResource("7_1l0tm")]
+position = Vector2(340, 366)
