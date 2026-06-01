@@ -85,8 +85,9 @@ script = ExtResource("1_3asvk")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_43px4")
-animation = &"Idle"
-frame_progress = 0.262542
+animation = &"Attack"
+frame = 3
+frame_progress = 0.974427
 
 [node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
 

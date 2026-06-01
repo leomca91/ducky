@@ -1,10 +1,7 @@
-res://Scenes/player.tscn
+res://Scenes/effects.tscn
 res://Scenes/game.tscn
+res://Scenes/player.tscn
 res://Scenes/Burgerenemie.tscn
 res://Scenes/HUD.tscn
-res://Scenes/effects.tscn
-res://Scenes/crab_enemy.gd
-res://crab_projectile.gd
 res://Scenes/CrabEnemy.tscn
 res://Scenes/crab_projectile.tscn
-res://Scenes/crab_projectile.gd

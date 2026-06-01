@@ -1638,7 +1638,7 @@ animations = [{
 }]
 
 [node name="Effects" type="AnimatedSprite2D"]
-rotation = -1.5708
+position = Vector2(0, -1)
 sprite_frames = SubResource("SpriteFrames_ex2br")
-animation = &"SmallFireBall"
-frame_progress = 0.367465
+animation = &"1"
+frame_progress = 0.3144
