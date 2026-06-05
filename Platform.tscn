@@ -3,8 +3,10 @@
 [ext_resource type="Script" uid="uid://bfi5s5jbai6dn" path="res://platform.gd" id="1_ibub6"]
 
 [node name="Platform" type="Node2D"]
+visible = false
 script = ExtResource("1_ibub6")
 
 [node name="ColorRect" type="ColorRect" parent="."]
+visible = false
 offset_right = 40.0
 offset_bottom = 40.0

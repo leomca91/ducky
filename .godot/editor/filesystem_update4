@@ -1,3 +1,5 @@
+res://Platform.tscn
+res://platform.gd
 res://Scenes/game.tscn
 res://Scenes/player.tscn
 res://Scenes/Burgerenemie.tscn
@@ -5,6 +7,3 @@ res://Scenes/HUD.tscn
 res://Scenes/CrabEnemy.tscn
 res://Scenes/crab_projectile.tscn
 res://Scenes/effects.tscn
-res://GD's/character_body_2d.gd
-res://platform.gd
-res://Platform.tscn
