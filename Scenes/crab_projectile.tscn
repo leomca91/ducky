@@ -1,6 +1,6 @@
 [gd_scene load_steps=65 format=3 uid="uid://bc4hmphm6kvi4"]
 
-[ext_resource type="Script" uid="uid://j4y0khncrs5y" path="res://Scenes/crab_projectile.gd" id="1_ga6nb"]
+[ext_resource type="Script" uid="uid://j4y0khncrs5y" path="res://GD's/crab_projectile (2).gd" id="1_ga6nb"]
 [ext_resource type="Texture2D" uid="uid://bralgu8sx01xp" path="res://Sprites/Effects/Small_Fireball_10x26.png" id="2_oqdpg"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_oqdpg"]

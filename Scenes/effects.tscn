@@ -1635,10 +1635,15 @@ animations = [{
 "loop": true,
 "name": &"SmallFireBall",
 "speed": 60.0
+}, {
+"frames": [],
+"loop": true,
+"name": &"new_animation",
+"speed": 10.0
 }]
 
 [node name="Effects" type="AnimatedSprite2D"]
 position = Vector2(0, -1)
 sprite_frames = SubResource("SpriteFrames_ex2br")
-animation = &"1"
-frame_progress = 0.3144
+animation = &"new_animation"
+frame_progress = 0.49636

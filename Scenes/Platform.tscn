@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://c3ut0tsdwha6w"]
 
-[ext_resource type="Script" uid="uid://bfi5s5jbai6dn" path="res://platform.gd" id="1_ibub6"]
+[ext_resource type="Script" uid="uid://bfi5s5jbai6dn" path="res://GD's/platform.gd" id="1_ibub6"]
 
 [node name="Platform" type="Node2D"]
 visible = false

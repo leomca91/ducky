@@ -1,15 +1,16 @@
-[gd_scene load_steps=12 format=4 uid="uid://dk8j344o0qxs0"]
+[gd_scene load_steps=14 format=4 uid="uid://dk8j344o0qxs0"]
 
 [ext_resource type="PackedScene" uid="uid://dsae3ukl76xob" path="res://Scenes/player.tscn" id="1_ebmjs"]
 [ext_resource type="Texture2D" uid="uid://7cocck5dl76i" path="res://Sprites/Tilemaps/azul_tiles.png" id="1_wrm1d"]
 [ext_resource type="Texture2D" uid="uid://chbkth5cqm4fe" path="res://Sprites/Tilemaps/kitchen_v1.png" id="2_3dryh"]
 [ext_resource type="PackedScene" uid="uid://df0qbngwc7ym1" path="res://Scenes/Burgerenemie.tscn" id="4_3dryh"]
-[ext_resource type="PackedScene" uid="uid://c3ut0tsdwha6w" path="res://Platform.tscn" id="5_v158k"]
+[ext_resource type="PackedScene" uid="uid://c3ut0tsdwha6w" path="res://Scenes/Platform.tscn" id="5_v158k"]
 [ext_resource type="Script" uid="uid://kwjdgftnjodd" path="res://GD's/camera_2d.gd" id="5_wowpa"]
 [ext_resource type="PackedScene" uid="uid://bow8e7eib3mjx" path="res://Scenes/HUD.tscn" id="6_i6g32"]
 [ext_resource type="PackedScene" uid="uid://cepgwov22ush3" path="res://Scenes/CrabEnemy.tscn" id="7_1l0tm"]
+[ext_resource type="Script" uid="uid://m4qm6eifys4u" path="res://GD's/trigger_zone.gd" id="9_h4fw4"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wowpa"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_v158k"]
 texture = ExtResource("1_wrm1d")
 0:0/0 = 0
 1:0/0 = 0
@@ -32,7 +33,7 @@ texture = ExtResource("1_wrm1d")
 2:4/0 = 0
 3:4/0 = 0
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_i6g32"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_h4fw4"]
 texture = ExtResource("2_3dryh")
 0:0/0 = 0
 1:0/0 = 0
@@ -933,8 +934,11 @@ texture = ExtResource("2_3dryh")
 35:35/0 = 0
 
 [sub_resource type="TileSet" id="TileSet_1l0tm"]
-sources/1 = SubResource("TileSetAtlasSource_wowpa")
-sources/2 = SubResource("TileSetAtlasSource_i6g32")
+sources/1 = SubResource("TileSetAtlasSource_v158k")
+sources/2 = SubResource("TileSetAtlasSource_h4fw4")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ldgsr"]
+size = Vector2(5.5, 705)
 
 [node name="Game" type="Node"]
 
@@ -974,3 +978,10 @@ position = Vector2(570, 367)
 [node name="ForegroundItems" type="TileMapLayer" parent="."]
 tile_map_data = PackedByteArray("AAAQABAAAgAIABoAAAAQABEAAgAIABsAAAARABAAAgAJABoAAAARABEAAgAJABsAAAARABkAAgAGAA0AAAARABoAAgAGAA4AAAARABsAAgAGAA8AAAASABkAAgAHAA0AAAASABoAAgAHAA4AAAASABsAAgAHAA8AAAAQABkAAgAEAAUAAAAPABkAAgAEAAUAAAAPABoAAgADAAYAAAAQABoAAgAEAAYAAAAOABkAAgAGAA0AABANABkAAgAHAA0AABAOABoAAgAGAA4AABANABoAAgAHAA4AABAOABsAAgAGAA8AABANABsAAgAHAA8AABAVABoAAgAGAAUAAAAVABsAAgAGAAYAAAAWABoAAgAHAAUAAAAWABsAAgAHAAYAAAAXABoAAgAIAAUAAAAXABsAAgAIAAYAAAAYABoAAgAJAAUAAAAYABsAAgAJAAYAAAAZABoAAgAKAAUAAAAZABsAAgAKAAYAAAAaABoAAgALAAUAAAAaABsAAgALAAYAAAAkABoAAgAYAAUAAAAkABsAAgAYAAYAAAAlABoAAgAZAAUAAAAlABsAAgAZAAYAAAAmABoAAgAaAAUAAAAmABsAAgAaAAYAAAAnABoAAgAbAAUAAAAnABsAAgAbAAYAAAAoABoAAgAcAAUAAAAoABsAAgAcAAYAAAApABoAAgAdAAUAAAApABsAAgAdAAYAAAA0ABoAAgAeAAUAAAA0ABsAAgAeAAYAAAA1ABoAAgAfAAUAAAA1ABsAAgAfAAYAAAA2ABoAAgAgAAUAAAA2ABsAAgAgAAYAAAA3ABoAAgAhAAUAAAA3ABsAAgAhAAYAAAA4ABoAAgAiAAUAAAA4ABsAAgAiAAYAAAA5ABoAAgAjAAUAAAA5ABsAAgAjAAYAAAAYABEAAgAEABsAAAAZABEAAgAFABsAAAAaABEAAgAEABsAAAAbABEAAgAFABsAAAAcABAAAgAIABoAAAAcABEAAgAIABsAAAAdABAAAgAJABoAAAAdABEAAgAJABsAAAAeABAAAgAIABoAAAAeABEAAgAIABsAAAAfABAAAgAJABoAAAAfABEAAgAJABsAAAAwABoAAgAEAB4AAAAwABsAAgAEAB8AAAAxABoAAgAFAB4AAAAxABsAAgAFAB8AAAAcABoAAgAEACAAAAAcABsAAgAEACEAAAAdABoAAgAFACAAAAAdABsAAgAFACEAAAAeABoAAgAEACAAAAAeABsAAgAEACEAAAAfABoAAgAFACAAAAAfABsAAgAFACEAAAAgABoAAgAEACAAAAAgABsAAgAEACEAAAAhABoAAgAFACAAAAAhABsAAgAFACEAAAA=")
 tile_set = SubResource("TileSet_1l0tm")
+
+[node name="TriggerZone" type="Area2D" parent="."]
+script = ExtResource("9_h4fw4")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TriggerZone"]
+position = Vector2(1017.75, 93.5)
+shape = SubResource("RectangleShape2D_ldgsr")
