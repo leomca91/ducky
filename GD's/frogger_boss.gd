@@ -13,7 +13,7 @@ const HEAL_THRESHOLD_2   = 0.20     # heals at 20%
 const HEAL_THRESHOLD_3   = 0.10     # heals at 10%
 const SPEED_BOOST        = 1.15     # 15% faster per heal
 const DEPTH_SPEED        = 50.0
-const SPIT_SCENE         = "res://Scenes/FrogSpit.tscn"
+const SPIT_SCENE         = "res://Scenes/frog_spit.tscn"
 
 var health               = MAX_HEALTH
 var speed                = BASE_SPEED
