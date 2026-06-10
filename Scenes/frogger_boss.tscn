@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://b5wje8ix8lns8"]
+[gd_scene load_steps=63 format=3 uid="uid://b5wje8ix8lns8"]
 
 [ext_resource type="Script" uid="uid://b8ovnq6px1bkl" path="res://GD's/frogger_boss.gd" id="1_lo86f"]
 [ext_resource type="Texture2D" uid="uid://bw1pkv71yhdak" path="res://Sprites/Frogger/frogger_heal.png" id="2_g6uuc"]
@@ -415,18 +415,17 @@ animations = [{
 [sub_resource type="CircleShape2D" id="CircleShape2D_jawpt"]
 radius = 41.0
 
-[node name="FroggerBoss" type="CharacterBody2D" unique_id=622790409]
+[node name="FroggerBoss" type="CharacterBody2D"]
 script = ExtResource("1_lo86f")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=270840013]
-position = Vector2(0, -44)
-scale = Vector2(1, 0.9921875)
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -46)
+scale = Vector2(1, 0.992188)
 sprite_frames = SubResource("SpriteFrames_0biml")
 animation = &"Move"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1160705032]
-position = Vector2(2, -22)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_jawpt")
 
-[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="." unique_id=1971655519]
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
 position = Vector2(1, 1)

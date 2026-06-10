@@ -1,17 +1,17 @@
 extends CharacterBody2D
 
-const FLOOR_TOP          = 250.0    # wider than normal level
+const FLOOR_TOP          = 250.0
 const FLOOR_BOTTOM       = 450.0
-const BASE_SPEED         = 112.0    # 0.75x player speed (150 * 0.75)
+const BASE_SPEED         = 112.0
 const ATTACK_RATE        = 2.0
 const TONGUE_RANGE       = 80.0
 const SPIT_RANGE         = 250.0
-const SPIT_MIN_RANGE     = 90.0     # wont spit if too close
+const SPIT_MIN_RANGE     = 90.0
 const MAX_HEALTH         = 300
-const HEAL_THRESHOLD_1   = 0.33     # heals at 33%
-const HEAL_THRESHOLD_2   = 0.20     # heals at 20%
-const HEAL_THRESHOLD_3   = 0.10     # heals at 10%
-const SPEED_BOOST        = 1.15     # 15% faster per heal
+const HEAL_THRESHOLD_1   = 0.33
+const HEAL_THRESHOLD_2   = 0.20
+const HEAL_THRESHOLD_3   = 0.10
+const SPEED_BOOST        = 1.15
 const DEPTH_SPEED        = 50.0
 const SPIT_SCENE         = "res://Scenes/frog_spit.tscn"
 
@@ -22,7 +22,7 @@ var attack_timer         = 0.0
 var is_dead              = false
 var is_attacking         = false
 var is_healing           = false
-var heal_count           = 0        # how many times healed
+var heal_count           = 0
 var has_healed_1         = false
 var has_healed_2         = false
 var has_healed_3         = false
@@ -31,6 +31,7 @@ var flash_timer          = 0.0
 var flash_color          = Color(1, 1, 1, 1)
 var is_flashing          = false
 var boss_hud             = null
+var invincible_timer     = 0.0
 
 @onready var sprite      = $AnimatedSprite2D
 
@@ -64,6 +65,9 @@ func _ready():
 	if boss_hud:
 		boss_hud.set_max_health(MAX_HEALTH)
 
+	print("Boss ready - player found: ", player != null)
+	print("Boss ready - hud found: ", boss_hud != null)
+
 func _on_animation_finished():
 	match sprite.animation:
 		"Tongue", "Spit":
@@ -71,16 +75,22 @@ func _on_animation_finished():
 			attack_anim_timer = 0.0
 			sprite.play("Idle")
 		"Hurt":
-			sprite.play("Idle")
+			if not is_dead:
+				sprite.play("Idle")
 		"Heal":
 			is_healing = false
 			sprite.play("Idle")
 
 func _physics_process(delta):
-	if is_dead or player == null or is_healing:
+	if is_dead or player == null:
 		return
 
-	# flash handling
+	if is_healing:
+		velocity.x = 0
+		move_and_slide()
+		return
+
+	# flash
 	if is_flashing:
 		flash_timer -= delta
 		var alpha = clamp(flash_timer / 0.15, 0.0, 1.0)
@@ -91,16 +101,20 @@ func _physics_process(delta):
 			is_flashing = false
 			_clear_flash()
 
+	# invincibility during healing
+	if invincible_timer > 0.0:
+		invincible_timer -= delta
+
 	attack_timer -= delta
 
-	var hdist      = abs(global_position.x - player.global_position.x)
-	var depth_diff = player.position.y - position.y
-
-	# check heal thresholds
+	# check heals
 	_check_heal()
 
 	if not is_attacking:
-		_move_toward_player(delta, hdist, depth_diff)
+		var hdist      = abs(global_position.x - player.global_position.x)
+		var depth_diff = player.position.y - position.y
+
+		_move_toward_player(depth_diff)
 
 		if attack_timer <= 0.0:
 			if hdist <= TONGUE_RANGE:
@@ -108,38 +122,39 @@ func _physics_process(delta):
 			elif hdist <= SPIT_RANGE and hdist > SPIT_MIN_RANGE:
 				_do_spit()
 
-	# failsafe
+	# attack failsafe
 	if is_attacking:
 		attack_anim_timer += delta
 		if attack_anim_timer > 3.0:
 			is_attacking      = false
 			attack_anim_timer = 0.0
+			sprite.play("Idle")
 
 	velocity.y = 0
 	move_and_slide()
 
-	# depth movement
 	position.y = clamp(position.y, FLOOR_TOP, FLOOR_BOTTOM)
 
-	# perspective scale
 	var t  = (position.y - FLOOR_TOP) / (FLOOR_BOTTOM - FLOOR_TOP)
 	var sc = lerp(0.8, 1.2, t)
 	scale  = Vector2(sc, sc)
 
-func _move_toward_player(delta, hdist, depth_diff):
-	var dir = sign(player.global_position.x - global_position.x)
-	# keep some distance for spit attacks
+func _move_toward_player(depth_diff: float):
+	var hdist = abs(global_position.x - player.global_position.x)
+	var dir   = sign(player.global_position.x - global_position.x)
+
 	if hdist > TONGUE_RANGE:
-		velocity.x     = dir * speed
-		sprite.flip_h  = dir < 0
+		velocity.x    = dir * speed
+		sprite.flip_h = dir < 0
+		if sprite.animation != "Move":
+			sprite.play("Move")
 	else:
 		velocity.x = 0
+		if sprite.animation != "Idle" and not is_attacking:
+			sprite.play("Idle")
 
-	sprite.play("Move" if velocity.x != 0 else "Idle")
-
-	# depth movement
 	if abs(depth_diff) > 2.0:
-		position.y += sign(depth_diff) * DEPTH_SPEED * delta
+		position.y += sign(depth_diff) * DEPTH_SPEED * get_physics_process_delta_time()
 
 func _check_heal():
 	var pct = float(health) / float(MAX_HEALTH)
@@ -154,28 +169,33 @@ func _check_heal():
 		_do_heal()
 
 func _do_heal():
-	is_healing   = true
-	is_attacking = false
-	velocity.x   = 0
+	is_healing       = true
+	is_attacking     = false
+	invincible_timer = 3.0
+	velocity.x       = 0
+	heal_count      += 1
+	speed            = BASE_SPEED * pow(SPEED_BOOST, heal_count)
+	health           = MAX_HEALTH
 	sprite.play("Heal")
-	heal_count  += 1
-	speed        = BASE_SPEED * pow(SPEED_BOOST, heal_count)
-	health       = MAX_HEALTH
 	if boss_hud:
 		boss_hud.heal_to_full()
+	print("Boss healed! Count: ", heal_count, " New speed: ", speed)
 
 func _do_tongue():
 	is_attacking      = true
 	attack_anim_timer = 0.0
 	attack_timer      = ATTACK_RATE
+	velocity.x        = 0
 	sprite.play("Tongue")
-	# damage player after short delay — tongue takes time to extend
+	_tongue_damage()
+
+func _tongue_damage():
 	await get_tree().create_timer(0.3).timeout
-	if is_dead:
+	if is_dead or player == null:
 		return
 	var hdist = abs(global_position.x - player.global_position.x)
 	var ddist = abs(position.y - player.position.y)
-	if hdist <= TONGUE_RANGE and ddist < 30.0 and player.visual_offset > -20.0:
+	if hdist <= TONGUE_RANGE + 10.0 and ddist < 40.0:
 		var dir = sign(player.global_position.x - global_position.x)
 		player.take_damage(dir)
 
@@ -183,16 +203,17 @@ func _do_spit():
 	is_attacking      = true
 	attack_anim_timer = 0.0
 	attack_timer      = ATTACK_RATE
+	velocity.x        = 0
 	sprite.play("Spit")
+	_spit_projectile()
+
+func _spit_projectile():
 	await get_tree().create_timer(0.4).timeout
 	if is_dead:
 		return
-	_spawn_spit()
-
-func _spawn_spit():
 	var spit_scene = load(SPIT_SCENE)
 	if spit_scene == null:
-		print("Could not load spit scene: ", SPIT_SCENE)
+		print("Could not load: ", SPIT_SCENE)
 		return
 	var spit = spit_scene.instantiate()
 	get_parent().add_child(spit)
@@ -208,30 +229,39 @@ func _flash(color: Color):
 	)
 
 func take_damage(amount: int, from_pos: Vector2, attack_type: String = "jab"):
-	if is_dead or is_healing:
+	print("take_damage called - amount: ", amount, " is_healing: ", is_healing, " invincible: ", invincible_timer)
+	if is_dead:
 		return
+	if invincible_timer > 0.0:
+		print("Boss invincible")
+		return
+	if is_healing:
+		print("Boss healing - blocked")
+		return
+
 	health -= amount
 	_flash(Color(1, 1, 1))
 	sprite.play("Hurt")
 
-	# knockback
 	var dir_x   = sign(global_position.x - from_pos.x)
-	position.x += dir_x * 20.0
+	position.x += dir_x * 15.0
 
 	if boss_hud:
 		boss_hud.take_damage(amount)
 
-	if health <= 0 and has_healed_3:
-		_die()
-	elif health <= 0:
-		health = 1    # cant die before all heals used
+	print("Boss health now: ", health, "/", MAX_HEALTH)
+
+	if health <= 0:
+		if has_healed_3:
+			_die()
+		else:
+			health = 1
 
 func _die():
 	is_dead    = true
 	velocity.x = 0
 	sprite.play("Hurt")
-	await get_tree().create_timer(1.0).timeout
-	# go back to main level or show win screen
+	await get_tree().create_timer(2.0).timeout
 	get_tree().change_scene_to_file("res://Scenes/game.tscn")
 
 func _clear_flash():
