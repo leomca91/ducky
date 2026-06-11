@@ -2,7 +2,7 @@ extends CanvasLayer
 
 const BAR_WIDTH  = 400.0
 const BAR_HEIGHT = 20.0
-const BAR_Y      = 10.0
+const BAR_Y      = 40.0    # was 10, pushed down so it clears the top edge
 const BORDER     = 2.0
 
 var max_health     = 100

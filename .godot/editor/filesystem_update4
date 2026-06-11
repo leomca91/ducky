@@ -1,9 +1,3 @@
-res://Scenes/player.tscn
-res://GD's/boss_hud.gd
-res://GD's/camera_boss.gd
-res://GD's/frogger_boss.gd
-res://GD's/frog_spit.gd
-res://GD's/trigger_zone.gd
 res://Scenes/game.tscn
 res://Scenes/boss_room.tscn
 res://Scenes/frogger_boss.tscn
@@ -13,3 +7,7 @@ res://Scenes/HUD.tscn
 res://Scenes/CrabEnemy.tscn
 res://Scenes/crab_projectile.tscn
 res://Scenes/effects.tscn
+res://GD's/boss_hud.gd
+res://GD's/character_body_2d.gd
+res://GD's/frogger_boss.gd
+res://GD's/camera_boss.gd

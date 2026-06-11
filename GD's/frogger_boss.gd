@@ -49,6 +49,7 @@ void fragment() {
 """
 
 func _ready():
+	add_to_group("enemies")    # move this to TOP before await
 	sprite.animation_finished.connect(_on_animation_finished)
 	sprite.play("Idle")
 	position.y = FLOOR_BOTTOM
@@ -64,7 +65,6 @@ func _ready():
 	boss_hud = get_tree().get_first_node_in_group("boss_hud")
 	if boss_hud:
 		boss_hud.set_max_health(MAX_HEALTH)
-
 	print("Boss ready - player found: ", player != null)
 	print("Boss ready - hud found: ", boss_hud != null)
 

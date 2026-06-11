@@ -29,11 +29,11 @@ const DMG_FSMASH         = 12
 const DMG_FTILT          = 10
 const DMG_USMASH         = 18
 
-const REACH_RIGHT_HOOK   = 40.0
-const REACH_SPAM         = 35.0
-const REACH_FSMASH       = 50.0
-const REACH_FTILT        = 45.0
-const REACH_USMASH       = 40.0
+const REACH_RIGHT_HOOK   = 60.0
+const REACH_SPAM         = 55.0
+const REACH_FSMASH       = 70.0
+const REACH_FTILT        = 65.0
+const REACH_USMASH       = 60.0
 const SPAM_HIT_RATE      = 0.15
 
 var is_jumping           = false
@@ -187,25 +187,11 @@ func _start_attack(attack_name: String):
 func _hit_nearby_enemies(damage: int, reach: float, attack_type: String = "jab"):
 	var enemies = get_tree().get_nodes_in_group("enemies")
 	for enemy in enemies:
-		var dist = global_position.distance_to(enemy.global_position)
-		if dist < reach:
+		var dist      = global_position.distance_to(enemy.global_position)
+		# give boss a larger hit range since it is a big sprite
+		var hit_reach = reach * 1.5 if enemy.is_in_group("boss") else reach
+		if dist < hit_reach:
 			enemy.take_damage(damage, global_position, attack_type)
-
-func _check_platforms(new_y: float) -> bool:
-	# returns true if movement to new_y is blocked by a platform
-	var platforms = get_tree().get_nodes_in_group("platforms")
-	for platform in platforms:
-		var pw      = platform.platform_width * 0.5
-		# check if player X is within platform width
-		if global_position.x < platform.global_position.x - pw:
-			continue
-		if global_position.x > platform.global_position.x + pw:
-			continue
-		# block moving UP past the platform Y (moving up = decreasing Y)
-		# platform acts as a wall you cant walk behind
-		if position.y > platform.global_position.y and new_y <= platform.global_position.y:
-			return true
-	return false
 
 func _physics_process(delta):
 	if is_dead:
@@ -273,10 +259,8 @@ func _physics_process(delta):
 			var dir_y = Input.get_axis("move_up", "move_down")
 			var new_y = position.y + dir_y * DEPTH_SPEED * delta
 			new_y     = clamp(new_y, FLOOR_TOP, FLOOR_BOTTOM)
-			# only block upward movement (moving behind obstacle)
-			# downward movement (toward camera) always allowed
 			if dir_y < 0 and _check_platforms(new_y):
-				pass    # blocked — cant walk behind platform
+				pass
 			else:
 				position.y = new_y
 
@@ -336,6 +320,18 @@ func _physics_process(delta):
 	scale  = Vector2(sc, sc)
 
 	_update_animation()
+
+func _check_platforms(new_y: float) -> bool:
+	var platforms = get_tree().get_nodes_in_group("platforms")
+	for platform in platforms:
+		var pw = platform.platform_width * 0.5
+		if global_position.x < platform.global_position.x - pw:
+			continue
+		if global_position.x > platform.global_position.x + pw:
+			continue
+		if position.y > platform.global_position.y and new_y <= platform.global_position.y:
+			return true
+	return false
 
 func take_damage(knockback_dir: float = 0.0):
 	if is_dead:
@@ -410,3 +406,4 @@ func _update_animation():
 			sprite.flip_h = dir_x < 0
 	else:
 		sprite.play("Idle")
+		
