@@ -938,7 +938,7 @@ sources/1 = SubResource("TileSetAtlasSource_v158k")
 sources/2 = SubResource("TileSetAtlasSource_h4fw4")
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ldgsr"]
-size = Vector2(5.5, 705)
+size = Vector2(61, 705)
 
 [node name="Game" type="Node"]
 
@@ -983,5 +983,5 @@ tile_set = SubResource("TileSet_1l0tm")
 script = ExtResource("9_h4fw4")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TriggerZone"]
-position = Vector2(1017.75, 93.5)
+position = Vector2(932, -217)
 shape = SubResource("RectangleShape2D_ldgsr")

@@ -1,0 +1,11 @@
+res://Scenes/boss_room.tscn::6b8717561f085ea7f0cb61cbf2ac37d3::1781484244::res://.godot/exported/133200997/export-e7f7b9dccf91f5b9aa341364ed5ae68d-boss_room.scn
+res://Scenes/Burgerenemie.tscn::065e04c252dba4d1fca1946953f98cc4::1781484244::res://.godot/exported/133200997/export-88fc89045544b930d1fe67985d6452dc-Burgerenemie.scn
+res://Scenes/CrabEnemy.tscn::c15f9a235d07b9885f9df12161075246::1781484245::res://.godot/exported/133200997/export-aa49b01d5c21f8567cddb77c6f31f72f-CrabEnemy.scn
+res://Scenes/crab_projectile.tscn::cb8dd44d9ed8d69cdca493208d454c9c::1781484245::res://.godot/exported/133200997/export-8445cfd8ec90bc61861b9cc270d72a08-crab_projectile.scn
+res://Scenes/effects.tscn::9f807ce475721ce5ab80536328f444aa::1781484245::res://.godot/exported/133200997/export-2afe56e3695cc19e1d0948eedea95256-effects.scn
+res://Scenes/frogger_boss.tscn::56f462f7792b20dba938bca3d2ce4fd3::1781484244::res://.godot/exported/133200997/export-059c1cdca833bfbd2c6dc53c97a40cc2-frogger_boss.scn
+res://Scenes/frog_spit.tscn::5a486cd0d2eca130f43723850a31c67f::1781484244::res://.godot/exported/133200997/export-3b364edfce503498a2b5c602a2b6cbc6-frog_spit.scn
+res://Scenes/game.tscn::bdbf4769fe6f7a2cdc6b518dc9c05c12::1781484285::res://.godot/exported/133200997/export-d45e16ca8d170891778b9dcfa9c69e68-game.scn
+res://Scenes/HUD.tscn::c6937298b0f7a1eb810d473891cb1336::1781484245::res://.godot/exported/133200997/export-9a2cb3fea6fe1c122965a87615eba9e3-HUD.scn
+res://Scenes/Platform.tscn::16c0c808f9b1a23f7fb77785352f9b90::1781041172::res://.godot/exported/133200997/export-0c10b42497166827ca9e673e6f7eca1f-Platform.scn
+res://Scenes/player.tscn::f3c64fae1f7ef2d67baba0a28f997f7f::1781131055::res://.godot/exported/133200997/export-1753c997600d68ab5d20ae99fddb15c6-player.scn
