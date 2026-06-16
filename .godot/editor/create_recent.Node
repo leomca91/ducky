@@ -1,6 +1,8 @@
+AnimatedSprite2D
+Label
+Sprite2D
 CollisionShape2D
 Area2D
-AnimatedSprite2D
 VisibleOnScreenNotifier2D
 VisibleOnScreenEnabler2D
 CharacterBody2D
@@ -10,5 +12,3 @@ ColorRect
 NavigationRegion2D
 Node2D
 Node
-TextureRect
-Control

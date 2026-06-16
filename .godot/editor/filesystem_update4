@@ -1,3 +1,4 @@
+res://Scenes/title.tscn
 res://Scenes/game.tscn
 res://Scenes/boss_room.tscn
 res://Scenes/frogger_boss.tscn
@@ -7,3 +8,4 @@ res://Scenes/HUD.tscn
 res://Scenes/CrabEnemy.tscn
 res://Scenes/crab_projectile.tscn
 res://Scenes/effects.tscn
+res://Scenes/carrit.tscn

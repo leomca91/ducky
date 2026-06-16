@@ -1,0 +1,32 @@
+[gd_scene load_steps=5 format=3 uid="uid://cc6hbpori171e"]
+
+[ext_resource type="Texture2D" uid="uid://4w6faoku7u2l" path="res://Sprites/Ducky Spritesheet V1/crouch.png" id="1_w31pl"]
+[ext_resource type="FontFile" uid="uid://ctpa5dylm4qte" path="res://911porscha/911porschav3.ttf" id="2_ekrfg"]
+
+[sub_resource type="Gradient" id="Gradient_ekrfg"]
+offsets = PackedFloat32Array(0, 0.596154)
+colors = PackedColorArray(6.01634e-07, 0, 0.373314, 1, 0.118581, 0.118581, 0.118581, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_fp2oq"]
+gradient = SubResource("Gradient_ekrfg")
+
+[node name="Title" type="Node2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(596, 293.5)
+scale = Vector2(21.7344, 13.5156)
+texture = SubResource("GradientTexture2D_fp2oq")
+
+[node name="Crouch" type="Sprite2D" parent="."]
+position = Vector2(612, 451.25)
+scale = Vector2(27.3437, 12.2422)
+texture = ExtResource("1_w31pl")
+
+[node name="Label" type="Label" parent="."]
+offset_left = 15.0
+offset_top = 456.0
+offset_right = 1156.0
+offset_bottom = 684.0
+theme_override_fonts/font = ExtResource("2_ekrfg")
+theme_override_font_sizes/font_size = 120
+text = "DUCKY DOOM"
