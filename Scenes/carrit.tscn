@@ -1,7 +1,7 @@
 [gd_scene load_steps=10 format=3 uid="uid://cqhic2tr44qjd"]
 
 [ext_resource type="Texture2D" uid="uid://o32momat2038" path="res://Sprites/CarrotEnemy/CARRIT (1).png" id="1_e2g33"]
-[ext_resource type="Texture2D" uid="uid://cwr57r3nmicos" path="res://Sprites/CarrotEnemy/9576c9ca98dc4b19bd6d53a3ba6bb0e7-removebg-preview (1).png" id="2_5c581"]
+[ext_resource type="Texture2D" uid="uid://cwr57r3nmicos" path="res://Sprites/CarrotEnemy/CarritSheild.png" id="2_5c581"]
 [ext_resource type="Texture2D" uid="uid://ca116w5rqlwo1" path="res://Sprites/CarrotEnemy/Sheild.png" id="3_fc2k2"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_lqfaf"]
