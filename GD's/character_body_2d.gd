@@ -23,7 +23,7 @@ const PARRY_HEAL         = 7
 const PARRY_WINDOW       = 0.3
 const INVINCIBLE_TIME    = 0.5
 const HIT_REACTION_DELAY = 0.2
-const BASE_DAMAGE_TAKEN  = 40
+const BASE_DAMAGE_TAKEN  = 26
 
 const DMG_RIGHT_HOOK     = 5
 const DMG_SPAM_ATTACK    = 2

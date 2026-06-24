@@ -171,7 +171,7 @@ func _check_heal():
 func _do_heal():
 	is_healing       = true
 	is_attacking     = false
-	invincible_timer = 3.0
+	invincible_timer = 2
 	velocity.x       = 0
 	heal_count      += 1
 	speed            = BASE_SPEED * pow(SPEED_BOOST, heal_count)

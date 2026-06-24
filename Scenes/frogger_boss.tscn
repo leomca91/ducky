@@ -1,4 +1,4 @@
-[gd_scene load_steps=63 format=3 uid="uid://b5wje8ix8lns8"]
+[gd_scene format=3 uid="uid://b5wje8ix8lns8"]
 
 [ext_resource type="Script" uid="uid://b8ovnq6px1bkl" path="res://GD's/frogger_boss.gd" id="1_lo86f"]
 [ext_resource type="Texture2D" uid="uid://bw1pkv71yhdak" path="res://Sprites/Frogger/frogger_heal.png" id="2_g6uuc"]
@@ -274,7 +274,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_71fos")
 }],
-"loop": false,
+"loop": 0,
 "name": &"Heal",
 "speed": 10.0
 }, {
@@ -291,7 +291,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_ddgg1")
 }],
-"loop": false,
+"loop": 0,
 "name": &"Hurt",
 "speed": 10.0
 }, {
@@ -311,7 +311,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_0bu61")
 }],
-"loop": true,
+"loop": 1,
 "name": &"Idle",
 "speed": 10.0
 }, {
@@ -340,7 +340,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_msug5")
 }],
-"loop": true,
+"loop": 1,
 "name": &"Move",
 "speed": 10.0
 }, {
@@ -378,7 +378,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_rsksu")
 }],
-"loop": false,
+"loop": 0,
 "name": &"Spit",
 "speed": 10.0
 }, {
@@ -407,25 +407,19 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_1mbm6")
 }],
-"loop": false,
+"loop": 0,
 "name": &"Tongue",
 "speed": 10.0
 }]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_jawpt"]
-radius = 41.0
-
-[node name="FroggerBoss" type="CharacterBody2D"]
+[node name="FroggerBoss" type="CharacterBody2D" unique_id=241435076]
 script = ExtResource("1_lo86f")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=120915113]
 position = Vector2(0, -46)
 scale = Vector2(1, 0.992188)
 sprite_frames = SubResource("SpriteFrames_0biml")
-animation = &"Move"
+animation = &"Heal"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("CircleShape2D_jawpt")
-
-[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="." unique_id=1620846763]
 position = Vector2(1, 1)
