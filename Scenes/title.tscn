@@ -1,5 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://cc6hbpori171e"]
+[gd_scene load_steps=6 format=3 uid="uid://cc6hbpori171e"]
 
+[ext_resource type="Script" uid="uid://bxs768y4ms6uk" path="res://Scenes/title.gd" id="1_fp2oq"]
 [ext_resource type="Texture2D" uid="uid://4w6faoku7u2l" path="res://Sprites/Ducky Spritesheet V1/crouch.png" id="1_w31pl"]
 [ext_resource type="FontFile" uid="uid://ctpa5dylm4qte" path="res://911porscha/911porschav3.ttf" id="2_ekrfg"]
 
@@ -11,6 +12,7 @@ colors = PackedColorArray(6.01634e-07, 0, 0.373314, 1, 0.118581, 0.118581, 0.118
 gradient = SubResource("Gradient_ekrfg")
 
 [node name="Title" type="Node2D"]
+script = ExtResource("1_fp2oq")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(596, 293.5)

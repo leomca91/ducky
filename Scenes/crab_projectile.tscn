@@ -3,6 +3,10 @@
 [ext_resource type="Script" uid="uid://j4y0khncrs5y" path="res://GD's/crab_projectile (2).gd" id="1_ga6nb"]
 [ext_resource type="Texture2D" uid="uid://bralgu8sx01xp" path="res://Sprites/Effects/Small_Fireball_10x26.png" id="2_oqdpg"]
 
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_wbm3g"]
+radius = 4.0
+height = 26.0
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_oqdpg"]
 atlas = ExtResource("2_oqdpg")
 region = Rect2(0, 0, 10, 26)
@@ -431,16 +435,12 @@ animations = [{
 "speed": 60.0
 }]
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_wbm3g"]
-radius = 4.0
-height = 26.0
-
 [node name="CrabProjectile" type="Area2D"]
 script = ExtResource("1_ga6nb")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CapsuleShape2D_wbm3g")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_bx37r")
 animation = &"CrabProjectile"
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("CapsuleShape2D_wbm3g")

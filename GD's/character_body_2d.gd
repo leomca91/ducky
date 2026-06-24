@@ -19,9 +19,11 @@ const ROLL_DURATION      = 0.35
 const LEFT_BOUNDARY      = 0.0
 const ATTACK_SLOW        = 0.3
 const MAX_HEALTH         = 100
-const PARRY_HEAL         = 15
+const PARRY_HEAL         = 7
 const PARRY_WINDOW       = 0.3
 const INVINCIBLE_TIME    = 0.5
+const HIT_REACTION_DELAY = 0.2
+const BASE_DAMAGE_TAKEN  = 40
 
 const DMG_RIGHT_HOOK     = 5
 const DMG_SPAM_ATTACK    = 2
@@ -188,7 +190,6 @@ func _hit_nearby_enemies(damage: int, reach: float, attack_type: String = "jab")
 	var enemies = get_tree().get_nodes_in_group("enemies")
 	for enemy in enemies:
 		var dist      = global_position.distance_to(enemy.global_position)
-		# give boss a larger hit range since it is a big sprite
 		var hit_reach = reach * 1.5 if enemy.is_in_group("boss") else reach
 		if dist < hit_reach:
 			enemy.take_damage(damage, global_position, attack_type)
@@ -338,17 +339,33 @@ func take_damage(knockback_dir: float = 0.0):
 		return
 	if invincible_timer > 0.0:
 		return
+
 	if is_parrying and parry_timer > 0.0:
 		_successful_parry()
 		return
 
+	_resolve_hit_with_grace(knockback_dir)
+
+func _resolve_hit_with_grace(knockback_dir: float):
+	await get_tree().create_timer(HIT_REACTION_DELAY).timeout
+
+	if is_dead:
+		return
+
+	if is_parrying and parry_timer > 0.0:
+		_successful_parry()
+		return
+
+	if invincible_timer > 0.0:
+		return
+
 	is_hurt          = true
 	invincible_timer = INVINCIBLE_TIME
-	health          -= 10
+	health          -= BASE_DAMAGE_TAKEN
 	sprite.play("Hurt")
 
 	if hud:
-		hud.take_damage(10)
+		hud.take_damage(BASE_DAMAGE_TAKEN)
 
 	if health <= 0:
 		die()
@@ -368,6 +385,11 @@ func die():
 	sprite.play("Death")
 	set_physics_process(false)
 	set_process_input(false)
+
+	var death_screen = get_tree().get_first_node_in_group("death_screen")
+	if death_screen:
+		death_screen.show_death_screen()
+		get_tree().paused = true
 
 func _update_animation():
 	if is_dead:
@@ -406,4 +428,3 @@ func _update_animation():
 			sprite.flip_h = dir_x < 0
 	else:
 		sprite.play("Idle")
-		

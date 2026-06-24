@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=4 uid="uid://dk8j344o0qxs0"]
+[gd_scene load_steps=16 format=4 uid="uid://dk8j344o0qxs0"]
 
 [ext_resource type="PackedScene" uid="uid://dsae3ukl76xob" path="res://Scenes/player.tscn" id="1_ebmjs"]
 [ext_resource type="Texture2D" uid="uid://7cocck5dl76i" path="res://Sprites/Tilemaps/azul_tiles.png" id="1_wrm1d"]
@@ -9,7 +9,8 @@
 [ext_resource type="PackedScene" uid="uid://bow8e7eib3mjx" path="res://Scenes/HUD.tscn" id="6_i6g32"]
 [ext_resource type="PackedScene" uid="uid://cepgwov22ush3" path="res://Scenes/CrabEnemy.tscn" id="7_1l0tm"]
 [ext_resource type="Script" uid="uid://m4qm6eifys4u" path="res://GD's/trigger_zone.gd" id="9_h4fw4"]
-[ext_resource type="PackedScene" uid="uid://cqhic2tr44qjd" path="res://Scenes/carrit.tscn" id="10_ldgsr"]
+[ext_resource type="PackedScene" uid="uid://deum7f2rksw2u" path="res://Scenes/pause_menu.tscn" id="10_o5yvi"]
+[ext_resource type="PackedScene" uid="uid://ckmijylpba56s" path="res://Scenes/death_screen.tscn" id="11_rku1e"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_v158k"]
 texture = ExtResource("1_wrm1d")
@@ -939,7 +940,7 @@ sources/1 = SubResource("TileSetAtlasSource_v158k")
 sources/2 = SubResource("TileSetAtlasSource_h4fw4")
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ldgsr"]
-size = Vector2(61, 705)
+size = Vector2(96, 272)
 
 [node name="Game" type="Node"]
 
@@ -984,8 +985,9 @@ tile_set = SubResource("TileSet_1l0tm")
 script = ExtResource("9_h4fw4")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TriggerZone"]
-position = Vector2(986, 100)
+position = Vector2(976, 312)
 shape = SubResource("RectangleShape2D_ldgsr")
 
-[node name="Carrit" parent="." instance=ExtResource("10_ldgsr")]
-position = Vector2(158, 341)
+[node name="PauseMenu" parent="." instance=ExtResource("10_o5yvi")]
+
+[node name="DeathScreen" parent="." instance=ExtResource("11_rku1e")]
