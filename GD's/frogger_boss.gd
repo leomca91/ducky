@@ -14,6 +14,8 @@ const HEAL_THRESHOLD_3   = 0.10
 const SPEED_BOOST        = 1.15
 const DEPTH_SPEED        = 50.0
 const SPIT_SCENE         = "res://Scenes/frog_spit.tscn"
+const HEAL_FAILSAFE_TIME = 2.0
+const WEIGHT             = 9.0
 
 var health               = MAX_HEALTH
 var speed                = BASE_SPEED
@@ -22,6 +24,7 @@ var attack_timer         = 0.0
 var is_dead              = false
 var is_attacking         = false
 var is_healing           = false
+var heal_anim_timer      = 0.0
 var heal_count           = 0
 var has_healed_1         = false
 var has_healed_2         = false
@@ -49,7 +52,8 @@ void fragment() {
 """
 
 func _ready():
-	add_to_group("enemies")    # move this to TOP before await
+	add_to_group("enemies")
+	add_to_group("boss")
 	sprite.animation_finished.connect(_on_animation_finished)
 	sprite.play("Idle")
 	position.y = FLOOR_BOTTOM
@@ -65,6 +69,7 @@ func _ready():
 	boss_hud = get_tree().get_first_node_in_group("boss_hud")
 	if boss_hud:
 		boss_hud.set_max_health(MAX_HEALTH)
+
 	print("Boss ready - player found: ", player != null)
 	print("Boss ready - hud found: ", boss_hud != null)
 
@@ -78,7 +83,8 @@ func _on_animation_finished():
 			if not is_dead:
 				sprite.play("Idle")
 		"Heal":
-			is_healing = false
+			is_healing      = false
+			heal_anim_timer = 0.0
 			sprite.play("Idle")
 
 func _physics_process(delta):
@@ -86,11 +92,15 @@ func _physics_process(delta):
 		return
 
 	if is_healing:
+		heal_anim_timer += delta
+		if heal_anim_timer > HEAL_FAILSAFE_TIME:
+			is_healing      = false
+			heal_anim_timer = 0.0
+			sprite.play("Idle")
 		velocity.x = 0
 		move_and_slide()
 		return
 
-	# flash
 	if is_flashing:
 		flash_timer -= delta
 		var alpha = clamp(flash_timer / 0.15, 0.0, 1.0)
@@ -101,16 +111,14 @@ func _physics_process(delta):
 			is_flashing = false
 			_clear_flash()
 
-	# invincibility during healing
 	if invincible_timer > 0.0:
 		invincible_timer -= delta
 
 	attack_timer -= delta
 
-	# check heals
 	_check_heal()
 
-	if not is_attacking:
+	if not is_attacking and not is_healing:
 		var hdist      = abs(global_position.x - player.global_position.x)
 		var depth_diff = player.position.y - position.y
 
@@ -122,7 +130,6 @@ func _physics_process(delta):
 			elif hdist <= SPIT_RANGE and hdist > SPIT_MIN_RANGE:
 				_do_spit()
 
-	# attack failsafe
 	if is_attacking:
 		attack_anim_timer += delta
 		if attack_anim_timer > 3.0:
@@ -171,7 +178,8 @@ func _check_heal():
 func _do_heal():
 	is_healing       = true
 	is_attacking     = false
-	invincible_timer = 2
+	invincible_timer = 3.0
+	heal_anim_timer  = 0.0
 	velocity.x       = 0
 	heal_count      += 1
 	speed            = BASE_SPEED * pow(SPEED_BOOST, heal_count)
@@ -229,27 +237,26 @@ func _flash(color: Color):
 	)
 
 func take_damage(amount: int, from_pos: Vector2, attack_type: String = "jab"):
-	print("take_damage called - amount: ", amount, " is_healing: ", is_healing, " invincible: ", invincible_timer)
 	if is_dead:
 		return
 	if invincible_timer > 0.0:
-		print("Boss invincible")
+		print("Boss invincible - blocked damage")
 		return
 	if is_healing:
-		print("Boss healing - blocked")
 		return
 
 	health -= amount
 	_flash(Color(1, 1, 1))
 	sprite.play("Hurt")
 
-	var dir_x   = sign(global_position.x - from_pos.x)
-	position.x += dir_x * 15.0
+	var knockback = _calculate_knockback(amount, attack_type)
+	var dir_x     = sign(global_position.x - from_pos.x)
+	position.x  += dir_x * knockback
 
 	if boss_hud:
 		boss_hud.take_damage(amount)
 
-	print("Boss health now: ", health, "/", MAX_HEALTH)
+	print("Boss took damage: ", amount, " Health: ", health, "/", MAX_HEALTH, " Knockback: ", knockback)
 
 	if health <= 0:
 		if has_healed_3:
@@ -257,12 +264,35 @@ func take_damage(amount: int, from_pos: Vector2, attack_type: String = "jab"):
 		else:
 			health = 1
 
+func _calculate_knockback(amount: int, attack_type: String) -> float:
+	var weight_factor = 1.0 - ((WEIGHT - 1.0) / 9.0)
+	match attack_type:
+		"jab":
+			return 3.0 * weight_factor
+		"spam":
+			return 2.0 * weight_factor
+		"smash":
+			var base = 80.0 + amount * 3.0
+			return base * weight_factor
+		"usmash":
+			return 20.0 * weight_factor
+		_:
+			return 5.0 * weight_factor
+
 func _die():
 	is_dead    = true
 	velocity.x = 0
 	sprite.play("Hurt")
-	await get_tree().create_timer(2.0).timeout
-	get_tree().change_scene_to_file("res://Scenes/game.tscn")
+
+	Engine.time_scale = 0.3
+
+	await get_tree().create_timer(1.5).timeout
+
+	Engine.time_scale = 1.0
+
+	var win_screen_scene = load("res://Scenes/win_screen_boss.tscn")
+	var win_screen        = win_screen_scene.instantiate()
+	get_tree().root.add_child(win_screen)
 
 func _clear_flash():
 	(sprite.material as ShaderMaterial).set_shader_parameter(

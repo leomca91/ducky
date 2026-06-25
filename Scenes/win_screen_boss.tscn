@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dpnjbu7lweijv"]
+
+[ext_resource type="Script" uid="uid://b8x8s1wepmujb" path="res://GD's/win_screen_boss.gd" id="1_mejj7"]
+
+[node name="WinScreenBoss" type="CanvasLayer"]
+script = ExtResource("1_mejj7")

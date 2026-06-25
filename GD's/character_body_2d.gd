@@ -23,7 +23,7 @@ const PARRY_HEAL         = 7
 const PARRY_WINDOW       = 0.3
 const INVINCIBLE_TIME    = 0.5
 const HIT_REACTION_DELAY = 0.2
-const BASE_DAMAGE_TAKEN  = 26
+const BASE_DAMAGE_TAKEN  = 11
 
 const DMG_RIGHT_HOOK     = 5
 const DMG_SPAM_ATTACK    = 2
@@ -387,9 +387,15 @@ func die():
 	set_process_input(false)
 
 	var death_screen = get_tree().get_first_node_in_group("death_screen")
+	if death_screen == null:
+		await get_tree().process_frame
+		death_screen = get_tree().get_first_node_in_group("death_screen")
+
 	if death_screen:
 		death_screen.show_death_screen()
 		get_tree().paused = true
+	else:
+		print("WARNING: death_screen not found in scene tree!")
 
 func _update_animation():
 	if is_dead:
