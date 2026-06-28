@@ -1,4 +1,4 @@
-[gd_scene load_steps=312 format=3 uid="uid://dj2ioh7wg86xq"]
+[gd_scene load_steps=319 format=3 uid="uid://dj2ioh7wg86xq"]
 
 [ext_resource type="Texture2D" uid="uid://bij2bw5c4we8k" path="res://Sprites/Effects/1/1_0.png" id="1_qcvnu"]
 [ext_resource type="Texture2D" uid="uid://dsnohpqe88hok" path="res://Sprites/Effects/1/1_1.png" id="2_th0s3"]
@@ -186,6 +186,7 @@
 [ext_resource type="Texture2D" uid="uid://c385k06sgrlny" path="res://Sprites/Effects/Blue Effect Bullet Impact Explosion 32x32.png" id="184_nyo70"]
 [ext_resource type="Texture2D" uid="uid://bqpekkj64n8p2" path="res://Sprites/Effects/Fireball_68x9.png" id="185_k3min"]
 [ext_resource type="Texture2D" uid="uid://bralgu8sx01xp" path="res://Sprites/Effects/Small_Fireball_10x26.png" id="186_7mx8b"]
+[ext_resource type="Texture2D" uid="uid://cjf8a04t1bkly" path="res://Sprites/Pixel UI pack 3/05.png" id="187_th0s3"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_3n408"]
 atlas = ExtResource("184_nyo70")
@@ -682,6 +683,30 @@ region = Rect2(80, 130, 10, 26)
 [sub_resource type="AtlasTexture" id="AtlasTexture_ii72q"]
 atlas = ExtResource("186_7mx8b")
 region = Rect2(90, 130, 10, 26)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jf8uh"]
+atlas = ExtResource("187_th0s3")
+region = Rect2(240, 16, 48, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_npdyw"]
+atlas = ExtResource("187_th0s3")
+region = Rect2(192, 16, 48, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_l02b0"]
+atlas = ExtResource("187_th0s3")
+region = Rect2(144, 16, 48, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ujs8t"]
+atlas = ExtResource("187_th0s3")
+region = Rect2(96, 16, 48, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rplhh"]
+atlas = ExtResource("187_th0s3")
+region = Rect2(48, 16, 48, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_onqlh"]
+atlas = ExtResource("187_th0s3")
+region = Rect2(0, 16, 48, 16)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_ex2br"]
 animations = [{
@@ -1640,10 +1665,34 @@ animations = [{
 "loop": true,
 "name": &"new_animation",
 "speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jf8uh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_npdyw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_l02b0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ujs8t")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rplhh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_onqlh")
+}],
+"loop": false,
+"name": &"new_animation_1",
+"speed": 3.3
 }]
 
 [node name="Effects" type="AnimatedSprite2D"]
 position = Vector2(0, -1)
 sprite_frames = SubResource("SpriteFrames_ex2br")
-animation = &"new_animation"
-frame_progress = 0.49636
+animation = &"new_animation_1"
+frame = 5
+frame_progress = 1.0

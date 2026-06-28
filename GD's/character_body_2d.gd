@@ -16,6 +16,7 @@ const CROUCH_SPEED_MULT  = 0.3
 const ROLL_SPEED         = 350.0
 const ROLL_DEPTH_SPEED   = 200.0
 const ROLL_DURATION      = 0.35
+const ROLL_COOLDOWN      = 1.0
 const LEFT_BOUNDARY      = 0.0
 const ATTACK_SLOW        = 0.3
 const MAX_HEALTH         = 100
@@ -24,6 +25,8 @@ const PARRY_WINDOW       = 0.3
 const INVINCIBLE_TIME    = 0.5
 const HIT_REACTION_DELAY = 0.2
 const BASE_DAMAGE_TAKEN  = 11
+const HEAVY_COOLDOWN     = 1.5
+const COOLDOWN_FRAMES    = 7
 
 const DMG_RIGHT_HOOK     = 5
 const DMG_SPAM_ATTACK    = 2
@@ -52,6 +55,7 @@ var is_rolling           = false
 var roll_timer           = 0.0
 var roll_dir_x           = 0.0
 var roll_dir_y           = 0.0
+var roll_cooldown_timer  = 0.0
 var is_dead              = false
 var is_hurt              = false
 var invincible_timer     = 0.0
@@ -61,6 +65,8 @@ var parry_used           = false
 var health               = MAX_HEALTH
 var hud                  = null
 var spam_hit_timer       = 0.0
+var heavy_cooldown_timer = 0.0
+var cooldown_icon        = null
 
 var q_used               = false
 var e_used               = false
@@ -76,6 +82,11 @@ func _ready():
 	hud = get_tree().get_first_node_in_group("hud")
 	if hud:
 		hud.set_max_health(MAX_HEALTH)
+		cooldown_icon = hud.get_node_or_null("CooldownIcon")
+		if cooldown_icon:
+			cooldown_icon.stop()
+			cooldown_icon.scale = Vector2(2, 2)
+			cooldown_icon.frame = COOLDOWN_FRAMES
 
 func _on_animation_finished():
 	match sprite.animation:
@@ -113,23 +124,27 @@ func _input(event):
 	if event is InputEventKey and event.pressed:
 		match event.keycode:
 			KEY_Q:
-				if not q_used:
+				if not q_used and heavy_cooldown_timer <= 0.0:
 					q_used = true
 					_start_attack("Fsmash")
+					heavy_cooldown_timer = HEAVY_COOLDOWN
 			KEY_E:
-				if not e_used:
+				if not e_used and heavy_cooldown_timer <= 0.0:
 					e_used = true
 					_start_attack("Ftilt")
+					heavy_cooldown_timer = HEAVY_COOLDOWN
 			KEY_R:
-				if not r_used:
+				if not r_used and heavy_cooldown_timer <= 0.0:
 					r_used = true
 					_start_attack("Usmash")
+					heavy_cooldown_timer = HEAVY_COOLDOWN
 			KEY_F:
-				if not parry_used and not is_parrying and not is_jumping:
+				if not parry_used and not is_parrying and not is_jumping and heavy_cooldown_timer <= 0.0:
 					is_parrying = true
 					parry_timer = PARRY_WINDOW
 					parry_used  = true
 					sprite.play("Parry")
+					heavy_cooldown_timer = HEAVY_COOLDOWN
 			KEY_SHIFT:
 				_do_roll()
 
@@ -143,11 +158,17 @@ func _input(event):
 				is_parrying = false
 
 func _do_roll():
-	if is_rolling:
+	if is_rolling or roll_cooldown_timer > 0.0:
 		return
-	is_rolling     = true
-	roll_timer     = ROLL_DURATION
-	current_attack = "Roll1"
+	is_rolling          = true
+	roll_timer          = ROLL_DURATION
+	current_attack      = "Roll1"
+	roll_cooldown_timer = ROLL_COOLDOWN
+
+	# roll now also acts as a parry — opens a parry window for its duration
+	is_parrying = true
+	parry_timer = ROLL_DURATION
+
 	var dir_x      = Input.get_axis("move_left", "move_right")
 	var dir_y      = Input.get_axis("move_up", "move_down")
 	roll_dir_x     = dir_x if dir_x != 0 else (1.0 if not sprite.flip_h else -1.0)
@@ -203,6 +224,24 @@ func _physics_process(delta):
 		sprite.modulate.a = 0.5 if fmod(invincible_timer, 0.1) > 0.05 else 1.0
 	else:
 		sprite.modulate.a = 1.0
+
+	if roll_cooldown_timer > 0.0:
+		roll_cooldown_timer -= delta
+		if roll_cooldown_timer < 0.0:
+			roll_cooldown_timer = 0.0
+
+	if heavy_cooldown_timer > 0.0:
+		heavy_cooldown_timer -= delta
+		if heavy_cooldown_timer < 0.0:
+			heavy_cooldown_timer = 0.0
+		var pct   = 1.0 - (heavy_cooldown_timer / HEAVY_COOLDOWN)
+		var frame = int(pct * COOLDOWN_FRAMES)
+		frame     = clamp(frame, 0, COOLDOWN_FRAMES)
+		if cooldown_icon:
+			cooldown_icon.frame = frame
+	else:
+		if cooldown_icon:
+			cooldown_icon.frame = COOLDOWN_FRAMES
 
 	if is_parrying and parry_timer > 0.0:
 		parry_timer -= delta
