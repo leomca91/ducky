@@ -1,560 +1,200 @@
 extends Node2D
 
-const SPEED           = 60.0
-const DEPTH_SPEED     = 40.0
-
-const FLOOR_TOP       = 300.0
-const FLOOR_BOTTOM    = 415.0
-
-const ATTACK_RANGE    = 5.0
-const ATTACK_DAMAGE   = 8
-const ATTACK_RATE     = 1.5
-const ATTACK_WARN     = 0.4
-
-const MAX_HEALTH      = 60
-
-# 0 = feather, 10 = immovable
-const WEIGHT          = 1.0
+const SPEED          = 60.0
+const DEPTH_SPEED    = 40.0
+const FLOOR_TOP      = 300.0
+const FLOOR_BOTTOM   = 415.0
+const ATTACK_RANGE   = 5.0
+const ATTACK_DAMAGE  = 8
+const ATTACK_RATE    = 1.5
+const MAX_HEALTH     = 60
+const ATTACK_WARN    = 0.4
+const SLIDE_FRICTION = 6.0
 
 var health            = MAX_HEALTH
-
 var player            = null
-
 var attack_timer      = 0.0
-
 var is_dead           = false
 var is_attacking      = false
 var is_warning        = false
-var is_flashing       = false
 var is_active         = false
-
 var warn_timer        = 0.0
 var attack_anim_timer = 0.0
-
 var flash_timer       = 0.0
 var flash_color       = Color(1, 1, 1, 1)
+var is_flashing       = false
+var slide_velocity    = 0.0
 
 @onready var sprite   = $AnimatedSprite2D
 @onready var notifier = $VisibleOnScreenNotifier2D
 
 const FLASH_SHADER = """
 shader_type canvas_item;
-
 uniform vec4 flash_color : source_color = vec4(1.0, 1.0, 1.0, 0.0);
-
 void fragment() {
-
 	vec4 tex = texture(TEXTURE, UV);
-
 	if (tex.a > 0.0) {
 		COLOR = mix(tex, vec4(flash_color.rgb, tex.a), flash_color.a);
-	}
-	else {
+	} else {
 		COLOR = tex;
 	}
 }
 """
 
 func _ready():
-
 	add_to_group("enemies")
-
 	player = get_tree().get_first_node_in_group("player")
-
 	position.y = FLOOR_BOTTOM
-
-	sprite.animation_finished.connect(
-		_on_animation_finished
-	)
-
+	sprite.animation_finished.connect(_on_animation_finished)
 	sprite.play("idle")
+	notifier.screen_entered.connect(_on_screen_entered)
 
-	notifier.screen_entered.connect(
-		_on_screen_entered
-	)
-
-	var shader = Shader.new()
-	shader.code = FLASH_SHADER
-
-	var mat = ShaderMaterial.new()
-	mat.shader = shader
-
+	var shader      = Shader.new()
+	shader.code     = FLASH_SHADER
+	var mat         = ShaderMaterial.new()
+	mat.shader      = shader
 	sprite.material = mat
 
 func _on_screen_entered():
-
 	is_active = true
 
 func _on_animation_finished():
-
 	if sprite.animation == "attack":
-
-		is_attacking = false
+		is_attacking      = false
 		attack_anim_timer = 0.0
-
 		sprite.play("idle")
 
 func _physics_process(delta):
-
 	if is_dead or player == null:
 		return
 
 	if not is_active:
-
 		sprite.play("idle")
 		return
 
-	# DAMAGE FLASH
+	if abs(slide_velocity) > 1.0:
+		position.x    += slide_velocity * delta
+		slide_velocity = lerp(slide_velocity, 0.0, SLIDE_FRICTION * delta)
+	else:
+		slide_velocity = 0.0
+
 	if is_flashing:
-
 		flash_timer -= delta
-
-		var alpha = clamp(
-			flash_timer / 0.15,
-			0.0,
-			1.0
-		)
-
+		var alpha = clamp(flash_timer / 0.15, 0.0, 1.0)
 		(sprite.material as ShaderMaterial).set_shader_parameter(
-			"flash_color",
-			Color(
-				flash_color.r,
-				flash_color.g,
-				flash_color.b,
-				alpha
-			)
+			"flash_color", Color(flash_color.r, flash_color.g, flash_color.b, alpha)
 		)
-
 		if flash_timer <= 0.0:
-
 			is_flashing = false
-
 			_clear_flash()
 
-	# WARNING FLASH
 	if is_warning:
-
 		warn_timer -= delta
-
-		var pulse = abs(
-			sin(warn_timer * 20.0)
-		)
-
+		var pulse = abs(sin(warn_timer * 20.0))
 		(sprite.material as ShaderMaterial).set_shader_parameter(
-			"flash_color",
-			Color(
-				0.2,
-				0.4,
-				1.0,
-				pulse * 0.8
-			)
+			"flash_color", Color(0.2, 0.4, 1.0, pulse * 0.8)
 		)
-
 		if warn_timer <= 0.0:
-
 			is_warning = false
-
 			_clear_flash()
-
 			_execute_attack()
 
-	# ATTACK FAILSAFE
 	if is_attacking:
-
 		attack_anim_timer += delta
-
 		if attack_anim_timer > 2.0:
-
-			is_attacking = false
+			is_attacking      = false
 			attack_anim_timer = 0.0
 
 	attack_timer -= delta
 
-	# DISTANCES
-	var hdist = abs(
-		global_position.x
-		- player.global_position.x
-	)
-
-	var depth_dist = abs(
-		position.y
-		- player.position.y
-	)
-
+	var hdist = abs(global_position.x - player.global_position.x)
+	var depth_dist           = abs(position.y - player.position.y)
 	var player_visual_offset = player.visual_offset
+	var on_same_plane        = depth_dist < 30.0 and player_visual_offset > -20.0
 
-	var on_same_plane = (
-		depth_dist < 30.0
-		and player_visual_offset > -20.0
-	)
-
-	# ATTACK PLAYER
 	if hdist <= ATTACK_RANGE and on_same_plane:
-
-		if (
-			attack_timer <= 0.0
-			and not is_attacking
-			and not is_warning
-		):
-
+		if attack_timer <= 0.0 and not is_attacking and not is_warning:
 			_start_warning()
-
 		else:
-
 			if not is_attacking and not is_warning:
 				sprite.play("idle")
-
-	# MOVE TO PLAYER
 	else:
-
-		if (
-			is_attacking
-			and hdist > ATTACK_RANGE + 5.0
-		):
-
-			is_attacking = false
+		if is_attacking and hdist > ATTACK_RANGE + 5.0:
+			is_attacking      = false
 			attack_anim_timer = 0.0
-
 		if not is_warning:
 			_move_toward_player(delta)
 
-	# FAKE DEPTH SCALE
-	var t = (
-		(position.y - FLOOR_TOP)
-		/ (FLOOR_BOTTOM - FLOOR_TOP)
-	)
-
+	var t  = (position.y - FLOOR_TOP) / (FLOOR_BOTTOM - FLOOR_TOP)
 	var sc = lerp(0.7, 1.0, t)
-
-	scale = Vector2(sc, sc)
+	scale  = Vector2(sc, sc)
 
 func _start_warning():
-
 	is_warning = true
-
 	warn_timer = ATTACK_WARN
-
 	sprite.play("idle")
 
 func _execute_attack():
-
-	var depth_dist = abs(
-		position.y - player.position.y
-	)
-
-	var player_visual_offset = (
-		player.visual_offset
-	)
-
-	var on_same_plane = (
-		depth_dist < 30.0
-		and player_visual_offset > -20.0
-	)
-
-	attack_timer = ATTACK_RATE
-
-	is_attacking = true
-
-	attack_anim_timer = 0.0
-
+	var depth_dist           = abs(position.y - player.position.y)
+	var player_visual_offset = player.visual_offset
+	var on_same_plane        = depth_dist < 30.0 and player_visual_offset > -20.0
+	attack_timer             = ATTACK_RATE
+	is_attacking             = true
+	attack_anim_timer        = 0.0
 	sprite.play("attack")
-
-	if (
-		player
-		and player.has_method("take_damage")
-		and on_same_plane
-	):
-		player.take_damage()
+	if player and player.has_method("take_damage") and on_same_plane:
+		var dir = sign(player.global_position.x - global_position.x)
+		player.take_damage(dir)
 
 func _move_toward_player(delta):
-
 	if is_attacking:
 		return
-
-	var dir = (
-		player.global_position
-		- global_position
-	).normalized()
-
-	position.x += (
-		dir.x
-		* SPEED
-		* delta
-	)
-
-	var depth_diff = (
-		player.position.y
-		- position.y
-	)
-
+	var dir = (player.global_position - global_position).normalized()
+	position.x += dir.x * SPEED * delta
+	var depth_diff = player.position.y - position.y
 	if abs(depth_diff) > 2.0:
-
-		position.y += (
-			sign(depth_diff)
-			* DEPTH_SPEED
-			* delta
-		)
-
-		position.y = clamp(
-			position.y,
-			FLOOR_TOP,
-			FLOOR_BOTTOM
-		)
-
+		position.y += sign(depth_diff) * DEPTH_SPEED * delta
+		position.y  = clamp(position.y, FLOOR_TOP, FLOOR_BOTTOM)
 	sprite.flip_h = dir.x < 0
-
 	sprite.play("walk")
 
 func _flash(color: Color):
-
 	flash_color = color
-
 	flash_timer = 0.15
-
 	is_flashing = true
-
 	(sprite.material as ShaderMaterial).set_shader_parameter(
-		"flash_color",
-		Color(
-			color.r,
-			color.g,
-			color.b,
-			1.0
-		)
+		"flash_color", Color(color.r, color.g, color.b, 1.0)
 	)
 
-func take_damage(
-	amount: int,
-	from_pos: Vector2,
-	attack_type: String = "jab"
-):
-
+func take_damage(amount: int, from_pos: Vector2, attack_type: String = "jab"):
 	if is_dead:
 		return
-
 	health -= amount
-
 	_flash(Color(1, 1, 1))
-
 	is_active = true
 
-	var knockback = _calculate_knockback(
-		amount,
-		attack_type
-	)
+	var knockback_strength = 4.0 if amount <= 2 else 12.0
+	var dir_x              = sign(global_position.x - from_pos.x)
+	slide_velocity         += dir_x * knockback_strength * 10.0
 
-	var dir_x = sign(
-		global_position.x - from_pos.x
-	)
-
-	var target_x = global_position.x
-
-	match attack_type:
-
-		# UP SMASH
-		"usmash":
-
-			# stronger horizontal launch
-			target_x += dir_x * (
-				knockback * 1.4
-			)
-
-			var tween = create_tween()
-
-			tween.set_trans(
-				Tween.TRANS_QUAD
-			)
-
-			tween.set_ease(
-				Tween.EASE_OUT
-			)
-
-			# horizontal movement
-			tween.tween_property(
-				self,
-				"global_position:x",
-				target_x,
-				0.28
-			)
-
-			# launch upward
-			tween.parallel().tween_property(
-				self,
-				"global_position:y",
-				global_position.y - 60.0,
-				0.12
-			)
-
-			# fall down
-			tween.tween_property(
-				self,
-				"global_position:y",
-				clamp(
-					global_position.y,
-					FLOOR_TOP,
-					FLOOR_BOTTOM
-				),
-				0.18
-			)
-
-		# HEAVY SMASH
-		"smash":
-
-			target_x += dir_x * knockback
-
-			var tween = create_tween()
-
-			tween.set_trans(
-				Tween.TRANS_QUAD
-			)
-
-			tween.set_ease(
-				Tween.EASE_OUT
-			)
-
-			tween.tween_property(
-				self,
-				"global_position:x",
-				target_x,
-				0.22
-			)
-
-		# SPAM ATTACK
-		"spam":
-
-			target_x += dir_x * (
-				knockback * 0.4
-			)
-
-			var tween = create_tween()
-
-			tween.set_trans(
-				Tween.TRANS_SINE
-			)
-
-			tween.set_ease(
-				Tween.EASE_OUT
-			)
-
-			tween.tween_property(
-				self,
-				"global_position:x",
-				target_x,
-				0.08
-			)
-
-		# NORMAL JAB
-		_:
-
-			target_x += dir_x * (
-				knockback * 0.6
-			)
-
-			var tween = create_tween()
-
-			tween.set_trans(
-				Tween.TRANS_QUAD
-			)
-
-			tween.set_ease(
-				Tween.EASE_OUT
-			)
-
-			tween.tween_property(
-				self,
-				"global_position:x",
-				target_x,
-				0.12
-			)
-
-	# INTERRUPT WARNING
-	if is_warning:
-
-		is_warning = false
-		warn_timer = 0.0
-
-		_clear_flash()
-
-	# DIE
 	if health <= 0:
 		_die()
 
-func _calculate_knockback(
-	amount: int,
-	attack_type: String
-) -> float:
-
-	# 1 = light
-	# 10 = heavy
-
-	var weight_factor = (
-		1.0
-		- ((WEIGHT - 1.0) / 9.0)
-	)
-
-	match attack_type:
-
-		"jab":
-			return 3.0
-
-		"spam":
-			return 2.0
-
-		"smash":
-
-			var base = (
-				80.0
-				+ amount * 3.0
-			)
-
-			return base * weight_factor
-
-		"usmash":
-			return 20.0 * weight_factor
-
-		_:
-			return 5.0
-
 func _die():
-
 	is_dead = true
-
 	_death_sequence()
 
 func _death_sequence():
-
 	var tween = create_tween()
-
 	for i in range(4):
-
-		tween.tween_callback(
-			_flash.bind(
-				Color(1, 0, 0)
-			)
-		)
-
+		tween.tween_callback(_flash.bind(Color(1, 0, 0)))
 		tween.tween_interval(0.1)
-
-		tween.tween_callback(
-			_clear_flash
-		)
-
+		tween.tween_callback(_clear_flash)
 		tween.tween_interval(0.1)
-
-	tween.tween_property(
-		sprite,
-		"modulate:a",
-		0.0,
-		0.3
-	)
-
-	tween.tween_callback(
-		queue_free
-	)
+	tween.tween_property(sprite, "modulate:a", 0.0, 0.3)
+	tween.tween_callback(queue_free)
 
 func _clear_flash():
-
 	(sprite.material as ShaderMaterial).set_shader_parameter(
-		"flash_color",
-		Color(1, 1, 1, 0)
+		"flash_color", Color(1, 1, 1, 0)
 	)

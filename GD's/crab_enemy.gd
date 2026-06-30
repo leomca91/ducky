@@ -11,6 +11,7 @@ const MAX_HEALTH         = 90
 const WEIGHT             = 8.0
 const MIN_DISTANCE       = 80.0
 const PROJECTILE_SCENE   = "res://Scenes/crab_projectile.tscn"
+const SLIDE_FRICTION     = 6.0
 
 var health            = MAX_HEALTH
 var player            = null
@@ -24,6 +25,7 @@ var attack_anim_timer = 0.0
 var flash_timer       = 0.0
 var flash_color       = Color(1, 1, 1, 1)
 var is_flashing       = false
+var slide_velocity    = 0.0
 
 @onready var sprite   = $AnimatedSprite2D
 @onready var notifier = $VisibleOnScreenNotifier2D
@@ -45,7 +47,7 @@ func _ready():
 	add_to_group("enemies")
 	player = get_tree().get_first_node_in_group("player")
 	position.y    = FLOOR_BOTTOM
-	sprite.flip_h = true    # sprite faces right by default so flip to face left
+	sprite.flip_h = true
 	sprite.animation_finished.connect(_on_animation_finished)
 	sprite.play("Idle")
 	notifier.screen_entered.connect(_on_screen_entered)
@@ -72,6 +74,12 @@ func _physics_process(delta):
 	if not is_active:
 		sprite.play("Idle")
 		return
+
+	if abs(slide_velocity) > 1.0:
+		position.x    += slide_velocity * delta
+		slide_velocity = lerp(slide_velocity, 0.0, SLIDE_FRICTION * delta)
+	else:
+		slide_velocity = 0.0
 
 	if is_flashing:
 		flash_timer -= delta
@@ -120,7 +128,6 @@ func _move_toward_player(delta):
 		return
 	var dir = (player.global_position - global_position).normalized()
 	position.x    += dir.x * SPEED * delta
-	# flip_h true = facing left, false = facing right
 	sprite.flip_h  = dir.x > 0
 	sprite.play("Idle")
 	_move_depth(delta)
@@ -133,7 +140,7 @@ func _move_depth(delta):
 
 func _start_warning():
 	is_warning = true
-	warn_timer  = ATTACK_WARN
+	warn_timer = ATTACK_WARN
 	sprite.play("Idle")
 
 func _execute_attack():
@@ -149,7 +156,7 @@ func _execute_attack():
 func _spawn_projectile():
 	var proj_scene = load(PROJECTILE_SCENE)
 	if proj_scene == null:
-		print("Could not load projectile scene at: ", PROJECTILE_SCENE)
+		print("Could not load: ", PROJECTILE_SCENE)
 		return
 	var proj = proj_scene.instantiate()
 	get_parent().add_child(proj)
@@ -171,29 +178,12 @@ func take_damage(amount: int, from_pos: Vector2, attack_type: String = "jab"):
 	_flash(Color(1, 1, 1))
 	is_active = true
 
-	var knockback = _calculate_knockback(amount, attack_type)
-	var dir_x     = sign(global_position.x - from_pos.x)
-	position.x   += dir_x * knockback
-	position.y    = clamp(position.y, FLOOR_TOP, FLOOR_BOTTOM)
-
-	if is_warning:
-		is_warning = false
-		warn_timer = 0.0
-		_clear_flash()
+	var knockback_strength = 4.0 if amount <= 2 else 12.0
+	var dir_x              = sign(global_position.x - from_pos.x)
+	slide_velocity         += dir_x * knockback_strength * 10.0
 
 	if health <= 0:
 		_die()
-
-func _calculate_knockback(amount: int, attack_type: String) -> float:
-	var weight_factor = 1.0 - ((WEIGHT - 1.0) / 9.0)
-	match attack_type:
-		"jab":    return 3.0
-		"spam":   return 2.0
-		"smash":
-			var base = 80.0 + amount * 3.0
-			return base * weight_factor
-		"usmash": return 20.0 * weight_factor
-		_:        return 5.0
 
 func _die():
 	is_dead = true

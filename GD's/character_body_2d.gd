@@ -27,6 +27,7 @@ const HIT_REACTION_DELAY = 0.2
 const BASE_DAMAGE_TAKEN  = 11
 const HEAVY_COOLDOWN     = 1.5
 const COOLDOWN_FRAMES    = 7
+const JAB_COOLDOWN       = 0.1    # cooldown between single-click jabs
 
 const DMG_RIGHT_HOOK     = 5
 const DMG_SPAM_ATTACK    = 2
@@ -67,6 +68,7 @@ var hud                  = null
 var spam_hit_timer       = 0.0
 var heavy_cooldown_timer = 0.0
 var cooldown_icon        = null
+var jab_cooldown_timer   = 0.0
 
 var q_used               = false
 var e_used               = false
@@ -113,9 +115,13 @@ func _input(event):
 
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
-			hold_timer     = 0.0
-			spam_hit_timer = 0.0
-			_start_attack("RightHook")
+			# jab only fires if its own short cooldown has expired —
+			# this stops auto-clickers/rapid clicks from spamming infinite jabs
+			if jab_cooldown_timer <= 0.0:
+				hold_timer         = 0.0
+				spam_hit_timer     = 0.0
+				jab_cooldown_timer = JAB_COOLDOWN
+				_start_attack("RightHook")
 		else:
 			hold_timer = 0.0
 			if current_attack == "SpamAttack":
@@ -165,7 +171,6 @@ func _do_roll():
 	current_attack      = "Roll1"
 	roll_cooldown_timer = ROLL_COOLDOWN
 
-	# roll now also acts as a parry — opens a parry window for its duration
 	is_parrying = true
 	parry_timer = ROLL_DURATION
 
@@ -224,6 +229,13 @@ func _physics_process(delta):
 		sprite.modulate.a = 0.5 if fmod(invincible_timer, 0.1) > 0.05 else 1.0
 	else:
 		sprite.modulate.a = 1.0
+
+	# jab cooldown only ticks down when NOT holding LMB —
+	# holding LMB transitions into SpamAttack which has its own rate limiting
+	if jab_cooldown_timer > 0.0 and not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		jab_cooldown_timer -= delta
+		if jab_cooldown_timer < 0.0:
+			jab_cooldown_timer = 0.0
 
 	if roll_cooldown_timer > 0.0:
 		roll_cooldown_timer -= delta

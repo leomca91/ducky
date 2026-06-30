@@ -16,6 +16,7 @@ const DEPTH_SPEED        = 50.0
 const SPIT_SCENE         = "res://Scenes/frog_spit.tscn"
 const HEAL_FAILSAFE_TIME = 2.0
 const WEIGHT             = 9.0
+const SLIDE_FRICTION     = 8.0
 
 var health               = MAX_HEALTH
 var speed                = BASE_SPEED
@@ -35,6 +36,7 @@ var flash_color          = Color(1, 1, 1, 1)
 var is_flashing          = false
 var boss_hud             = null
 var invincible_timer     = 0.0
+var slide_velocity       = 0.0
 
 @onready var sprite      = $AnimatedSprite2D
 
@@ -70,9 +72,6 @@ func _ready():
 	if boss_hud:
 		boss_hud.set_max_health(MAX_HEALTH)
 
-	print("Boss ready - player found: ", player != null)
-	print("Boss ready - hud found: ", boss_hud != null)
-
 func _on_animation_finished():
 	match sprite.animation:
 		"Tongue", "Spit":
@@ -100,6 +99,12 @@ func _physics_process(delta):
 		velocity.x = 0
 		move_and_slide()
 		return
+
+	if abs(slide_velocity) > 1.0:
+		position.x    += slide_velocity * delta
+		slide_velocity = lerp(slide_velocity, 0.0, SLIDE_FRICTION * delta)
+	else:
+		slide_velocity = 0.0
 
 	if is_flashing:
 		flash_timer -= delta
@@ -187,7 +192,6 @@ func _do_heal():
 	sprite.play("Heal")
 	if boss_hud:
 		boss_hud.heal_to_full()
-	print("Boss healed! Count: ", heal_count, " New speed: ", speed)
 
 func _do_tongue():
 	is_attacking      = true
@@ -221,7 +225,6 @@ func _spit_projectile():
 		return
 	var spit_scene = load(SPIT_SCENE)
 	if spit_scene == null:
-		print("Could not load: ", SPIT_SCENE)
 		return
 	var spit = spit_scene.instantiate()
 	get_parent().add_child(spit)
@@ -240,23 +243,19 @@ func take_damage(amount: int, from_pos: Vector2, attack_type: String = "jab"):
 	if is_dead:
 		return
 	if invincible_timer > 0.0:
-		print("Boss invincible - blocked damage")
 		return
 	if is_healing:
 		return
 
 	health -= amount
 	_flash(Color(1, 1, 1))
-	sprite.play("Hurt")
 
 	var knockback = _calculate_knockback(amount, attack_type)
 	var dir_x     = sign(global_position.x - from_pos.x)
-	position.x  += dir_x * knockback
+	slide_velocity += dir_x * knockback * 8.0
 
 	if boss_hud:
 		boss_hud.take_damage(amount)
-
-	print("Boss took damage: ", amount, " Health: ", health, "/", MAX_HEALTH, " Knockback: ", knockback)
 
 	if health <= 0:
 		if has_healed_3:
@@ -268,16 +267,16 @@ func _calculate_knockback(amount: int, attack_type: String) -> float:
 	var weight_factor = 1.0 - ((WEIGHT - 1.0) / 9.0)
 	match attack_type:
 		"jab":
-			return 3.0 * weight_factor
+			return 1.5 * weight_factor
 		"spam":
-			return 2.0 * weight_factor
+			return 1.0 * weight_factor
 		"smash":
-			var base = 80.0 + amount * 3.0
+			var base = 20.0 + amount * 1.0
 			return base * weight_factor
 		"usmash":
-			return 20.0 * weight_factor
+			return 6.0 * weight_factor
 		_:
-			return 5.0 * weight_factor
+			return 2.0 * weight_factor
 
 func _die():
 	is_dead    = true
